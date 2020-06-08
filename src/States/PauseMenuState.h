@@ -7,25 +7,35 @@
 
 #include "../GameConfig.h"
 #include "../StateManager/State.h"
+#include <Thor/Time.hpp>
+#include <Thor/Shapes.hpp>
+
+enum class PauseMenuChoices
+{
+    eVolume,
+    eUnpause
+};
 
 class PauseMenuState: public State
 {
 public:
-    PauseMenuState(StateMachine* stateMachine);
+    explicit PauseMenuState(StateMachine* stateMachine);
 
-    virtual void draw(const float dt);
-    virtual void update(const float dt);
-    virtual void handleInput();
+    void draw(float dt) override;
+    void update(float dt) override;
+    void handleInput() override;
 
 private:
     void goBackToInGame();
 
     sf::View menuView;
-    sf::Clock clock;
     sf::Sound sound;
-    std::vector<sf::Text> pauseMenuText;
-    std::vector<sf::Color> pauseColorStates = {TMConfig::gameOverMenuColor, TMConfig::gameWordFontColor};
-    unsigned int pauseColorIndex = 0;
+    sf::Text pauseText;
+    sf::Text returnToGameText;
+    sf::Text volumeText;
+    std::vector<sf::ConvexShape> volumeRects;
+    unsigned int pauseMenuSelectionId = 1;
+    unsigned int volumeRectIndex = 1;
 };
 
 

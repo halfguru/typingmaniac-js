@@ -7,26 +7,29 @@
 
 #include "../StateManager/State.h"
 
-enum class MenuState
+enum class GameMenuChoice
 {
-    PLAY,
-    QUIT
+    ePlay,
+    eQuit
 };
 
 
-class GameMenuState: public State {
+class GameMenuState: public State
+{
 public:
-    GameMenuState(StateMachine* stateMachine);
+    explicit GameMenuState(StateMachine* stateMachine);
 
-    virtual void draw(const float dt);
-    virtual void update(const float dt);
-    virtual void handleInput();
+    void draw(float dt) override;
+    void update(float dt) override;
+    void handleInput() override;
 
 private:
     void loadGame();
 
+    sf::Text startGameText;
+    sf::Text quitGameText;
+    sf::Text selectText;
     sf::View menuView;
-    std::vector<sf::Text> menuText;
     sf::Clock clock;
     sf::Sound sound;
     sf::Music gameMenuMusic;
@@ -35,6 +38,5 @@ private:
     unsigned int menuSelectionId = 0;
     unsigned int backgroundColorValue = 255;
 };
-
 
 #endif //TYPINGMANIAC_GAMEMENUSTATE_H

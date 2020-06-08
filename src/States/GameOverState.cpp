@@ -19,23 +19,26 @@ GameOverState::GameOverState(StateMachine *stateMachine)
         LOG4CPLUS_ERROR(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Can't load " << TMAssets::gameOverMusicPath);
     }
 
-    gameOverMenuText.resize(2);
-    gameOverMenuText[0].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    gameOverMenuText[0].setString("GAME OVER");
-    gameOverMenuText[0].setCharacterSize(TMConfig::gameOverMenuFontSize);
-    gameOverMenuText[0].setFillColor(TMConfig::gameOverMenuColor);
-    gameOverMenuText[0].setStyle(sf::Text::Bold);
-    gameOverMenuText[0].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 200.0f, this->stateMachine->window.getSize().y * 0.5f - 50.0f));
+    sf::Text gameOver;
+    sf::Text returnToMenu;
+    gameOver.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    gameOver.setString("GAME OVER");
+    gameOver.setCharacterSize(TMConfig::gameOverMenuFontSize);
+    gameOver.setFillColor(TMConfig::gameOverMenuColor);
+    gameOver.setStyle(sf::Text::Bold);
+    gameOver.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 200.0f, this->stateMachine->window.getSize().y * 0.5f - 50.0f));
+    returnToMenu.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    returnToMenu.setString("Press Space to return");
+    returnToMenu.setCharacterSize(TMConfig::gameOverMenuFontSize - 20);
+    returnToMenu.setFillColor(TMConfig::gameOverMenuColor);
+    returnToMenu.setStyle(sf::Text::Bold);
+    returnToMenu.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 250.0f, this->stateMachine->window.getSize().y * 0.5f + 50.0f));
 
-    gameOverMenuText[1].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    gameOverMenuText[1].setString("Press Space to return");
-    gameOverMenuText[1].setCharacterSize(TMConfig::gameOverMenuFontSize - 20);
-    gameOverMenuText[1].setFillColor(TMConfig::gameOverMenuColor);
-    gameOverMenuText[1].setStyle(sf::Text::Bold);
-    gameOverMenuText[1].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 250.0f, this->stateMachine->window.getSize().y * 0.5f + 50.0f));
+    gameOverMenuText.push_back(gameOver);
+    gameOverMenuText.push_back(returnToMenu);
 
     gameOverMusic.setLoop(false);
-    gameOverMusic.setVolume(10);
+    gameOverMusic.setVolume(this->stateMachine->configParser.getVolume());
     gameOverMusic.play();
 }
 
@@ -95,8 +98,8 @@ void GameOverState::handleInput()
             {
                 if (event.key.code == sf::Keyboard::Space)
                 {
-                    sound.setVolume(10);
-                    sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::MenuSelect]);
+                    sound.setVolume(this->stateMachine->configParser.getVolume());
+                    sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eMenuSelect]);
                     sound.play();
                     goBackToMainMenu();
                     break;

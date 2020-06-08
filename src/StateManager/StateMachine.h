@@ -13,20 +13,12 @@
 #include "../GameConfig.h"
 #include <Thor/Resources.hpp>
 
-struct TMScreenConfig
-{
-    std::string name;
-    unsigned short width;
-    unsigned short height;
-    unsigned char frameRate;
-};
-
 class State;
 
 class StateMachine
 {
 public:
-    StateMachine(struct TMScreenConfig tmScreenConfig);
+    StateMachine();
     ~StateMachine();
 
     void pushState(State* state);
@@ -38,9 +30,12 @@ public:
     std::stack<State*> states;
     sf::RenderWindow window;
     sf::Sprite background;
+    sf::Sprite volume;
+    sf::Sprite muted;
     thor::ResourceHolder<sf::Font, TMAssets::FontType> fonts;
     thor::ResourceHolder<sf::Texture, TMAssets::TextureType> textures;
     thor::ResourceHolder<sf::SoundBuffer, TMAssets::SoundType> sounds;
+    TMConfig::ConfigParser configParser;
 
 private:
     void loadTextures();

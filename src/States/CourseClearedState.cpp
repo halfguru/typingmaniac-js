@@ -18,12 +18,9 @@ CourseClearedState::CourseClearedState(StateMachine *stateMachine)
         LOG4CPLUS_ERROR(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Can't load " << TMAssets::courseClearedMusicPath);
     }
 
-    courseClearedText.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    courseClearedText.setString("LEVEL PASSED");
+    courseClearedText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
     courseClearedText.setCharacterSize(TMConfig::gameOverMenuFontSize);
-    courseClearedText.setFillColor(TMConfig::gameOverMenuColor);
-    courseClearedText.setStyle(sf::Text::Bold);
-    courseClearedText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 250.0f, this->stateMachine->window.getSize().y * 0.5f - 25.0f));
+    courseClearedText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 300.0f, this->stateMachine->window.getSize().y * 0.5f - 200.0f));
 
     courseClearedMusic.setLoop(false);
     courseClearedMusic.play();
@@ -39,6 +36,11 @@ void CourseClearedState::draw(const float dt)
 
 void CourseClearedState::update(const float dt)
 {
+    if(clock.getElapsedTime().asSeconds() > 0.15f && courseClearedStringIndex < courseClearedString.size())
+    {
+        clock.restart();
+        courseClearedText << sf::Color::Red << courseClearedString[courseClearedStringIndex++] << " ";
+    }
 }
 
 void CourseClearedState::handleInput()

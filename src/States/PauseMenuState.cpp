@@ -13,20 +13,47 @@ PauseMenuState::PauseMenuState(StateMachine *stateMachine)
     pos *= 0.5f;
     menuView.setCenter(pos);
 
-    pauseMenuText.resize(2);
-    pauseMenuText[0].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    pauseMenuText[0].setString("PAUSE");
-    pauseMenuText[0].setCharacterSize(TMConfig::gameOverMenuFontSize);
-    pauseMenuText[0].setFillColor(TMConfig::gameOverMenuColor);
-    pauseMenuText[0].setStyle(sf::Text::Bold);
-    pauseMenuText[0].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 125.0f, this->stateMachine->window.getSize().y * 0.5f - 50.0f));
+    this->stateMachine->volume.setScale(this->stateMachine->window.getSize().x * 0.000019f, this->stateMachine->window.getSize().y * 0.000033f);
+    this->stateMachine->volume.setPosition(this->stateMachine->window.getSize().x * 0.383f, this->stateMachine->window.getSize().y * 0.62f);
+    this->stateMachine->muted.setScale(this->stateMachine->window.getSize().x * 0.000031f, this->stateMachine->window.getSize().y * 0.000055f);
+    this->stateMachine->muted.setPosition(this->stateMachine->window.getSize().x * 0.383f, this->stateMachine->window.getSize().y * 0.62f);
 
-    pauseMenuText[1].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    pauseMenuText[1].setString("Press Space to return");
-    pauseMenuText[1].setCharacterSize(TMConfig::gameOverMenuFontSize - 20);
-    pauseMenuText[1].setFillColor(TMConfig::gameOverMenuColor);
-    pauseMenuText[1].setStyle(sf::Text::Bold);
-    pauseMenuText[1].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 250.0f, this->stateMachine->window.getSize().y * 0.5f + 50.0f));
+    for (int i = 0; i < 5; ++i)
+    {
+        sf::ConvexShape volumeRect = thor::Shapes::roundedRect(sf::Vector2f(30.0f, 30.0f + 10.0f * i), 5.0f, sf::Color(sf::Color::Red));
+        volumeRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f + this->stateMachine->window.getSize().x * 0.025f * i, this->stateMachine->window.getSize().y * 0.64f));
+        volumeRect.rotate(180.0f);
+        volumeRects.push_back(volumeRect);
+    }
+
+    volumeRectIndex = this->stateMachine->configParser.getVolume() / 20;
+    for (int j = 0; j < volumeRectIndex; ++j) {
+        volumeRects[j] = thor::Shapes::roundedRect(sf::Vector2f(30.0f, 30.0f + 10.0f * j), 5.0f, sf::Color(sf::Color::Green));
+        volumeRects[j].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f + this->stateMachine->window.getSize().x * 0.025f * j, this->stateMachine->window.getSize().y * 0.64f));
+        volumeRects[j].rotate(180.0f);
+        this->stateMachine->window.draw(volumeRects[j]);
+    }
+
+    pauseText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    pauseText.setString("PAUSE");
+    pauseText.setCharacterSize(TMConfig::pauseMenuFontSize);
+    pauseText.setFillColor(TMConfig::gameOverMenuColor);
+    pauseText.setStyle(sf::Text::Bold);
+    pauseText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.28f));
+
+    returnToGameText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    returnToGameText.setString("Return to game");
+    returnToGameText.setCharacterSize(TMConfig::gameOverMenuFontSize - 20);
+    returnToGameText.setFillColor(TMConfig::gameMenuFontColor);
+    returnToGameText.setStyle(sf::Text::Bold);
+    returnToGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.72f));
+
+    volumeText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    volumeText.setString("Master Volume");
+    volumeText.setCharacterSize(TMConfig::gameOverMenuFontSize - 20);
+    volumeText.setFillColor(TMConfig::gameMenuFontColor);
+    volumeText.setStyle(sf::Text::Bold);
+    volumeText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.5f));
 }
 
 void PauseMenuState::draw(const float dt)
@@ -34,21 +61,49 @@ void PauseMenuState::draw(const float dt)
     this->stateMachine->window.setView(menuView);
     this->stateMachine->window.clear(sf::Color::Black);
     this->stateMachine->window.draw(this->stateMachine->background);
-    for (const auto& menuText: pauseMenuText)
+
+    if (this->stateMachine->configParser.getVolume() == 0)
     {
-        this->stateMachine->window.draw(menuText);
+        this->stateMachine->window.draw(this->stateMachine->muted);
+    }
+    else
+    {
+        this->stateMachine->window.draw(this->stateMachine->volume);
+    }
+
+    this->stateMachine->window.draw(volumeText);
+    this->stateMachine->window.draw(pauseText);
+    this->stateMachine->window.draw(returnToGameText);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        volumeRects[i] = thor::Shapes::roundedRect(sf::Vector2f(30.0f, 30.0f + 10.0f * i), 5.0f, sf::Color(sf::Color::Red));
+        volumeRects[i].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f + this->stateMachine->window.getSize().x * 0.025f * i, this->stateMachine->window.getSize().y * 0.5f + 150.0f));
+        volumeRects[i].rotate(180.0f);
+        this->stateMachine->window.draw(volumeRects[i]);
+    }
+
+    for (int j = 0; j < volumeRectIndex; ++j) {
+        volumeRects[j] = thor::Shapes::roundedRect(sf::Vector2f(30.0f, 30.0f + 10.0f * j), 5.0f, sf::Color(sf::Color::Green));
+        volumeRects[j].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f + this->stateMachine->window.getSize().x * 0.025f * j, this->stateMachine->window.getSize().y * 0.5f + 150.0f));
+        volumeRects[j].rotate(180.0f);
+        this->stateMachine->window.draw(volumeRects[j]);
     }
 
 }
 
 void PauseMenuState::update(const float dt)
 {
-    if (clock.getElapsedTime().asSeconds() > 0.2f)
-    {
-        clock.restart();
-        pauseColorIndex = (pauseColorIndex + 1) % pauseColorStates.size();
-        pauseMenuText[1].setFillColor(pauseColorStates[pauseColorIndex]);
-    }
+    volumeText.setFillColor(sf::Color::White);
+    returnToGameText.setFillColor(sf::Color::White);
+
+
+    if (pauseMenuSelectionId == static_cast<int>(PauseMenuChoices::eVolume))
+        volumeText.setFillColor(sf::Color::Yellow);
+    if (pauseMenuSelectionId == static_cast<int>(PauseMenuChoices::eUnpause))
+        returnToGameText.setFillColor(sf::Color::Yellow);
+
+
 }
 
 void PauseMenuState::handleInput()
@@ -68,22 +123,71 @@ void PauseMenuState::handleInput()
                 /* Resize the window */
             case sf::Event::Resized:
             {
-                menuView.setSize(event.size.width, event.size.height);
-                this->stateMachine->background.setPosition(this->stateMachine->window.mapPixelToCoords(sf::Vector2i(0, 0)));
-                this->stateMachine->background.setScale(
-                        float(event.size.width) / float(this->stateMachine->background.getTexture()->getSize().x),
-                        float(event.size.height) / float(this->stateMachine->background.getTexture()->getSize().y));
+                sf::Vector2f pos = sf::Vector2f(this->stateMachine->window.getSize());
+                menuView.setSize(pos);
+                pos *= 0.5f;
+                menuView.setCenter(pos);
+
+                for (int i = 0; i < volumeRects.size(); ++i)
+                {
+                  volumeRects[i].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f + this->stateMachine->window.getSize().x * 0.025f * i, this->stateMachine->window.getSize().y * 0.64f));
+                }
+                this->stateMachine->volume.setScale(this->stateMachine->window.getSize().x * 0.000019f, this->stateMachine->window.getSize().y * 0.000033f);
+                this->stateMachine->muted.setScale(this->stateMachine->window.getSize().x * 0.000031f, this->stateMachine->window.getSize().y * 0.000055f);
+                this->stateMachine->volume.setPosition(this->stateMachine->window.getSize().x * 0.383f, this->stateMachine->window.getSize().y * 0.62f);
+                this->stateMachine->muted.setPosition(this->stateMachine->window.getSize().x * 0.383f, this->stateMachine->window.getSize().y * 0.62f);
+                pauseText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.28f));
+                returnToGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.72f));
+                volumeText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.38f, this->stateMachine->window.getSize().y * 0.5f));
                 break;
             }
             case sf::Event::KeyPressed:
             {
-                if (event.key.code == sf::Keyboard::Space)
+                if (event.key.code == sf::Keyboard::Down)
                 {
-                    sound.setVolume(10);
-                    sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::MenuSelect]);
-                    sound.play();
-                    goBackToInGame();
-                    break;
+                    pauseMenuSelectionId = (pauseMenuSelectionId + 1) % 2;
+                }
+
+                else if (event.key.code == sf::Keyboard::Up)
+                {
+                    pauseMenuSelectionId = (pauseMenuSelectionId - 1) % 2;
+                }
+
+                else if(event.key.code == sf::Keyboard::Enter)
+                {
+                    switch (pauseMenuSelectionId)
+                    {
+                        case static_cast<int>(PauseMenuChoices::eUnpause):
+                        {
+                            sound.setVolume(this->stateMachine->configParser.getVolume());
+                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eMenuSelect]);
+                            sound.play();
+                            goBackToInGame();
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                }
+
+                else if(event.key.code == sf::Keyboard::Left && pauseMenuSelectionId == static_cast<int>(PauseMenuChoices::eVolume))
+                {
+                    if (this->stateMachine->configParser.getVolume() > 0)
+                    {
+                        volumeRectIndex--;
+                        this->stateMachine->configParser.setVolume(this->stateMachine->configParser.getVolume() - 20);
+                        LOG4CPLUS_INFO(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Volume set at: " << this->stateMachine->configParser.readInt(TMConfig::sectionName, TMConfig::volumePropertyName));
+                    }
+                }
+
+                else if(event.key.code == sf::Keyboard::Right && pauseMenuSelectionId == static_cast<int>(PauseMenuChoices::eVolume))
+                {
+                    if (this->stateMachine->configParser.getVolume() < 100)
+                    {
+                        volumeRectIndex++;
+                        this->stateMachine->configParser.setVolume(this->stateMachine->configParser.getVolume() + 20);
+                        LOG4CPLUS_INFO(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Volume set at: " << this->stateMachine->configParser.readInt(TMConfig::sectionName, TMConfig::volumePropertyName));
+                    }
                 }
             }
             default:

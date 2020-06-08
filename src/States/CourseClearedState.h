@@ -20,9 +20,13 @@ public:
 private:
     void goBacktoInGame();
 
+    sfe::RichText courseClearedText;
+    sf::Text courseClearedStats;
     sf::View menuView;
-    sf::Text courseClearedText;
+    sf::Clock clock;
     sf::Music courseClearedMusic;
+    std::string courseClearedString = "LEVEL PASSED";
+    int courseClearedStringIndex = 0;
 };
 
 

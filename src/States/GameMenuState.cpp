@@ -20,27 +20,25 @@ GameMenuState::GameMenuState(StateMachine *stateMachine)
         LOG4CPLUS_ERROR(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Can't load " << TMAssets::menuMusicPath);
     }
 
-    menuText.resize(3);
-    menuText[0].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    menuText[0].setString("Start Game");
-    menuText[0].setCharacterSize(TMConfig::menuFontSize);
-    menuText[0].setFillColor(TMConfig::gameMenuFontColor);
-    menuText[0].setStyle(sf::Text::Bold);
-    menuText[0].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 100.0f, this->stateMachine->window.getSize().y * 0.5f));
-    menuText[1].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    menuText[1].setString("Quit");
-    menuText[1].setCharacterSize(TMConfig::menuFontSize);
-    menuText[1].setFillColor(TMConfig::gameMenuFontColor);
-    menuText[1].setStyle(sf::Text::Bold);
-    menuText[1].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 100.0f, this->stateMachine->window.getSize().y * 0.5f + 50.0f));
-    menuText[2].setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    menuText[2].setString(">");
-    menuText[2].setCharacterSize(TMConfig::menuFontSize);
-    menuText[2].setFillColor(TMConfig::gameMenuFontColor);
-    menuText[2].setStyle(sf::Text::Bold);
-    menuText[2].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 120.0f, this->stateMachine->window.getSize().y * 0.5f));
+    startGameText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    startGameText.setString("Start Game");
+    startGameText.setCharacterSize(TMConfig::menuFontSize);
+    startGameText.setFillColor(TMConfig::gameMenuFontColor);
+    startGameText.setStyle(sf::Text::Bold);
+    startGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f, this->stateMachine->window.getSize().y * 0.5f));
+    quitGameText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    quitGameText.setString("Quit");
+    quitGameText.setCharacterSize(TMConfig::menuFontSize);
+    quitGameText.setFillColor(TMConfig::gameMenuFontColor);
+    quitGameText.setStyle(sf::Text::Bold);
+    quitGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f, this->stateMachine->window.getSize().y * 0.56f));
+    selectText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    selectText.setString(">");
+    selectText.setCharacterSize(TMConfig::menuFontSize);
+    selectText.setFillColor(TMConfig::gameMenuFontColor);
+    selectText.setStyle(sf::Text::Bold);
 
-    gameMenuMusic.setVolume(10);
+    gameMenuMusic.setVolume(this->stateMachine->configParser.getVolume());
     gameMenuMusic.setLoop(true);
     gameMenuMusic.play();
 }
@@ -52,17 +50,25 @@ void GameMenuState::draw(const float dt)
     this->stateMachine->background.setColor(sf::Color(255, 255, 255, backgroundColorValue));
     this->stateMachine->window.draw(this->stateMachine->background);
 
-    if (menuSelectionId == static_cast<int>(MenuState::PLAY))
-        menuText[2].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 120.0f, this->stateMachine->window.getSize().y * 0.5f));
-    if (menuSelectionId == static_cast<int>(MenuState::QUIT))
-        menuText[2].setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 120.0f, this->stateMachine->window.getSize().y * 0.5f + 50.0f));
-    for (auto &text: menuText)
+    startGameText.setFillColor(TMConfig::gameMenuFontColor);
+    quitGameText.setFillColor(TMConfig::gameMenuFontColor);
+    selectText.setFillColor(sf::Color(255,  0, 0, colorValue));
+
+    if (menuSelectionId == static_cast<int>(GameMenuChoice::ePlay))
     {
-        text.setFillColor(TMConfig::gameMenuFontColor);
-        menuText.at(menuSelectionId).setFillColor(sf::Color(255,  0, 0, colorValue));
-        menuText[2].setFillColor(sf::Color(255,  0, 0, colorValue));
-        this->stateMachine->window.draw(text);
+        selectText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.42f, this->stateMachine->window.getSize().y * 0.5f));
+        startGameText.setFillColor(sf::Color(255,  0, 0, colorValue));
     }
+
+    else if (menuSelectionId == static_cast<int>(GameMenuChoice::eQuit))
+    {
+        selectText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.42f, this->stateMachine->window.getSize().y * 0.56f));
+        quitGameText.setFillColor(sf::Color(255,  0, 0, colorValue));
+    }
+
+    this->stateMachine->window.draw(startGameText);
+    this->stateMachine->window.draw(quitGameText);
+    this->stateMachine->window.draw(selectText);
 }
 
 void GameMenuState::update(const float dt)
@@ -103,42 +109,43 @@ void GameMenuState::handleInput()
                 /* Resize the window */
             case sf::Event::Resized:
             {
-                menuView.setSize(event.size.width, event.size.height);
-                this->stateMachine->background.setPosition(this->stateMachine->window.mapPixelToCoords(sf::Vector2i(0, 0)));
-                this->stateMachine->background.setScale(
-                        float(event.size.width) / float(this->stateMachine->background.getTexture()->getSize().x),
-                        float(event.size.height) / float(this->stateMachine->background.getTexture()->getSize().y));
+                sf::Vector2f pos = sf::Vector2f(this->stateMachine->window.getSize());
+                menuView.setSize(pos);
+                pos *= 0.5f;
+                menuView.setCenter(pos);
+                startGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f, this->stateMachine->window.getSize().y * 0.5f));
+                quitGameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.45f, this->stateMachine->window.getSize().y * 0.56f));
                 break;
             }
             case sf::Event::KeyPressed:
             {
                 if (event.key.code == sf::Keyboard::Down)
                 {
-                    menuSelectionId = (menuSelectionId + 1) % (menuText.size() - 1);
+                    menuSelectionId = (menuSelectionId + 1) % 2;
                 }
 
                 else if (event.key.code == sf::Keyboard::Up)
                 {
-                    menuSelectionId = (menuSelectionId - 1) % (menuText.size() - 1);
+                    menuSelectionId = (menuSelectionId - 1) % 2;
                 }
 
                 else if(event.key.code == sf::Keyboard::Enter)
                 {
                     switch (menuSelectionId)
                     {
-                        case static_cast<int>(MenuState::PLAY):
+                        case static_cast<int>(GameMenuChoice::ePlay):
                         {
-                            sound.setVolume(10);
-                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::MenuSelect]);
+                            sound.setVolume(this->stateMachine->configParser.getVolume());
+                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eMenuSelect]);
                             sound.play();
                             loadingGame = true;
                             break;
                         }
-                        case static_cast<int>(MenuState::QUIT):
+                        case static_cast<int>(GameMenuChoice::eQuit):
                         {
                             LOG4CPLUS_INFO(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Exiting game");
-                            sound.setVolume(10);
-                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::MenuSelect]);
+                            sound.setVolume(this->stateMachine->configParser.getVolume());
+                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eMenuSelect]);
                             sound.play();
                             this->stateMachine->window.close();
                             break;
@@ -158,7 +165,7 @@ void GameMenuState::handleInput()
 
 void GameMenuState::loadGame()
 {
-    LOG4CPLUS_INFO(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Loading game");
+    LOG4CPLUS_INFO(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Starting game");
     gameMenuMusic.stop();
     this->stateMachine->pushState(new GameState(this->stateMachine));
 }

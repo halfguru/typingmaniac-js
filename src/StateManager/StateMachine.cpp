@@ -7,14 +7,19 @@
 #include "StateMachine.h"
 #include "State.h"
 
-StateMachine::StateMachine(struct TMScreenConfig tmScreenConfig)
+StateMachine::StateMachine():
+        configParser(TMConfig::configFilePath.string())
 {
-    this->window.create(sf::VideoMode(tmScreenConfig.width, tmScreenConfig.height), tmScreenConfig.name);
-    this->window.setFramerateLimit(tmScreenConfig.frameRate);
+    this->window.create(sf::VideoMode(configParser.readInt(TMConfig::sectionName, TMConfig::screenWidthPropertyName),
+                                            configParser.readInt(TMConfig::sectionName, TMConfig::screenHeightPropertyName)),
+                                        configParser.read(TMConfig::sectionName, TMConfig::windowNamePropertyName));
+    this->window.setFramerateLimit(configParser.readInt(TMConfig::sectionName, TMConfig::frameRatePropertyName));
     this->loadFonts();
     this->loadTextures();
     this->loadSounds();
-    this->background.setTexture(textures[TMAssets::TextureType::Background]);
+    this->background.setTexture(textures[TMAssets::TextureType::eBackground]);
+    this->volume.setTexture(textures[TMAssets::TextureType::eVolume]);
+    this->muted.setTexture((textures[TMAssets::TextureType::eMute]));
 }
 
 StateMachine::~StateMachine()
@@ -79,10 +84,10 @@ void StateMachine::loadSounds()
 {
     try
     {
-        sounds.acquire(TMAssets::SoundType::CorrectWord, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::correctWordSoundPath.string()));
-        sounds.acquire(TMAssets::SoundType::ErrorWord, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::errorWordSoundPath.string()));
-        sounds.acquire(TMAssets::SoundType::MenuSelect, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::menuSelectSoundPath.string()));
-        sounds.acquire(TMAssets::SoundType::MenuPause, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::menuPauseSoundPath.string()));
+        sounds.acquire(TMAssets::SoundType::eCorrectWord, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::correctWordSoundPath.string()));
+        sounds.acquire(TMAssets::SoundType::eErrorWord, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::errorWordSoundPath.string()));
+        sounds.acquire(TMAssets::SoundType::eMenuSelect, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::menuSelectSoundPath.string()));
+        sounds.acquire(TMAssets::SoundType::eMenuPause, thor::Resources::fromFile<sf::SoundBuffer>(TMAssets::menuPauseSoundPath.string()));
     }
     catch (thor::ResourceLoadingException& e)
     {
@@ -94,7 +99,9 @@ void StateMachine::loadTextures()
 {
     try
     {
-        textures.acquire(TMAssets::TextureType::Background, thor::Resources::fromFile<sf::Texture>(TMAssets::backgroundImgPath.string()));
+        textures.acquire(TMAssets::TextureType::eBackground, thor::Resources::fromFile<sf::Texture>(TMAssets::blueBackgroundImgPath.string()));
+        textures.acquire(TMAssets::TextureType::eVolume, thor::Resources::fromFile<sf::Texture>(TMAssets::volumeIconImgPath.string()));
+        textures.acquire(TMAssets::TextureType::eMute, thor::Resources::fromFile<sf::Texture>(TMAssets::muteIconImgPath.string()));
     }
     catch (thor::ResourceLoadingException& e)
     {
@@ -106,7 +113,7 @@ void StateMachine::loadFonts()
 {
     try
     {
-        fonts.acquire(TMAssets::FontType::Minecraft, thor::Resources::fromFile<sf::Font>(TMAssets::minecraftFontPath.string()));
+        fonts.acquire(TMAssets::FontType::eMinecraft, thor::Resources::fromFile<sf::Font>(TMAssets::minecraftFontPath.string()));
     }
     catch (thor::ResourceLoadingException& e)
     {

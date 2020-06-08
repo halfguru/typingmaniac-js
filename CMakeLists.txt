@@ -26,7 +26,7 @@ add_executable(${PROJECT_NAME}
         src/StateManager/StateMachine.h
         sfml_module/include/SFML/Graphics/RichText.cpp
         sfml_module/include/SFML/Graphics/RichText.hpp
-        )
+        src/GameUtils.h src/ini.h src/GameConfig.cpp)
 
 find_package(SFML 2.5 REQUIRED system window graphics audio)
 if (SFML_FOUND)

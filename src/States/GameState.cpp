@@ -2,11 +2,10 @@
 // Created by Simon on 5/12/2020.
 //
 
-#include <cmath>
 #include <log4cplus/loggingmacros.h>
-#include <fstream>
 #include <iostream>
 #include <stdlib.h>
+#include "../GameUtils.h"
 #include "../GameConfig.h"
 #include "CourseClearedState.h"
 #include "GameState.h"
@@ -15,8 +14,6 @@
 
 GameState::GameState(StateMachine* stateMachine)
 {
-    srand(time(0));
-
     this->stateMachine = stateMachine;
     this->stateMachine->background.setColor(sf::Color(255, 255, 255, 255));
     sf::Vector2f pos = sf::Vector2f(this->stateMachine->window.getSize());
@@ -29,45 +26,52 @@ GameState::GameState(StateMachine* stateMachine)
         LOG4CPLUS_ERROR(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "Can't load " << TMAssets::inGameMusicPath);
     }
 
-    gameText.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
+    gameText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
     gameText.setString("Typing Maniac Game");
     gameText.setCharacterSize(TMConfig::wordFontSize);
     gameText.setFillColor(sf::Color::Black);
     gameText.setStyle(sf::Text::Bold);
-    gameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.5f - 100.0f, this->stateMachine->window.getSize().y - 50.0f));
+    gameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.4f, this->stateMachine->window.getSize().y * 0.95f));
 
-    scoreText.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
+    scoreText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
     scoreText.setString(gameStatistics.scoreText + std::to_string(gameStatistics.score));
     scoreText.setCharacterSize(TMConfig::wordFontSize);
     scoreText.setFillColor(sf::Color::Black);
     scoreText.setStyle(sf::Text::Bold);
-    scoreText.setPosition(sf::Vector2f(100.0f, this->stateMachine->window.getSize().y - 50.0f));
+    scoreText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.95f));
 
-    livesText.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
+    livesText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
     livesText.setString(gameStatistics.livesText + std::to_string(gameStatistics.lives));
     livesText.setCharacterSize(TMConfig::wordFontSize);
     livesText.setFillColor(sf::Color::Black);
     livesText.setStyle(sf::Text::Bold);
-    livesText.setPosition(sf::Vector2f(1100.0f, this->stateMachine->window.getSize().y - 50.0f));
+    livesText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.9f, this->stateMachine->window.getSize().y * 0.95f));
 
-    progressionText.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
-    progressionText.setString(std::to_string(int(gameStatistics.percentageProgression)) + gameStatistics.percentageProgressionText);
+    wpmText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    wpmText.setString(gameStatistics.wpmText + std::to_string(gameStatistics.wpm));
+    wpmText.setCharacterSize(TMConfig::wordFontSize);
+    wpmText.setFillColor(sf::Color::Black);
+    wpmText.setStyle(sf::Text::Bold);
+    wpmText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.7f, this->stateMachine->window.getSize().y * 0.95f));
+
+    progressionText.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
+    progressionText.setString(std::to_string(static_cast<int>(gameStatistics.percentageProgression)) + gameStatistics.percentageProgressionText);
     progressionText.setCharacterSize(TMConfig::wordFontSize);
     progressionText.setFillColor(sf::Color::Black);
     progressionText.setStyle(sf::Text::Bold);
-    progressionText.setPosition(sf::Vector2f(35.0f, this->stateMachine->window.getSize().y - 140.0f));
+    progressionText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.02f, this->stateMachine->window.getSize().y * 0.85f));
 
-    limitRect.setPosition(sf::Vector2f(0, this->stateMachine->window.getSize().y - 75.0f));
+    limitRect.setPosition(sf::Vector2f(0, this->stateMachine->window.getSize().y * 0.92f));
     limitRect.setSize(sf::Vector2f(this->stateMachine->window.getSize().x, 10));
     limitRect.setFillColor(sf::Color(150, 50, 150, 150));
 
-    staticProgressionRect = thor::Shapes::roundedRect(sf::Vector2f(50.0f, 720.0f/2), 5.0f, sf::Color(sf::Color::Red));
-    staticProgressionRect.setPosition(sf::Vector2f(75.0f, this->stateMachine->window.getSize().y - 150.0f));
+    staticProgressionRect = thor::Shapes::roundedRect(sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, this->stateMachine->window.getSize().y * 0.6), 5.0f, sf::Color(sf::Color::Red));
+    staticProgressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.84f));
     staticProgressionRect.rotate(180.0f);
 
-    oldProgressionRectSize = progressionRectSize = sf::Vector2f(50.0f, 0.0f);
+    oldProgressionRectSize = progressionRectSize = sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, 0.0f);
     progressionRect = thor::Shapes::roundedRect(progressionRectSize, 0.0f, sf::Color(sf::Color::Green));
-    progressionRect.setPosition(sf::Vector2f(75.0f, this->stateMachine->window.getSize().y - 150.0f));
+    progressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.84f));
     progressionRect.rotate(180.0f);
 
     loadDictionary();
@@ -81,6 +85,7 @@ void GameState::draw(const float dt)
     this->stateMachine->window.draw(gameText);
     this->stateMachine->window.draw(scoreText);
     this->stateMachine->window.draw(livesText);
+    this->stateMachine->window.draw(wpmText);
     this->stateMachine->window.draw(progressionText);
     this->stateMachine->window.draw(limitRect);
     this->stateMachine->window.draw(staticProgressionRect);
@@ -96,9 +101,10 @@ void GameState::update(const float dt)
     // New game
     if (!gameStarted)
     {
+        wpmStopWatch.restart();
         gameStopWatch.restart();
         statsStopWatch.restart();
-        inGameMusic.setVolume(10);
+        inGameMusic.setVolume(this->stateMachine->configParser.getVolume());
         inGameMusic.setLoop(true);
         inGameMusic.play();
 
@@ -110,10 +116,18 @@ void GameState::update(const float dt)
     {
         gamePaused = false;
         inGameMusic.setLoop(true);
-        inGameMusic.setVolume(10);
+        inGameMusic.setVolume(this->stateMachine->configParser.getVolume());
         inGameMusic.play();
+        wpmStopWatch.start();
         gameStopWatch.start();
         statsStopWatch.start();
+    }
+
+    if (wpmStopWatch.getElapsedTime().asMilliseconds() > (300 * wpmRefreshCounter))
+    {
+        wpmRefreshCounter++;
+        gameStatistics.wpm = static_cast<int>(TMUtils::getGrossTypingSpeed(gameStatistics.allTypedChars, wpmStopWatch.getElapsedTime().asSeconds() / 60.0f));
+        wpmText.setString(gameStatistics.wpmText + std::to_string(gameStatistics.wpm));
     }
 
     if (statsStopWatch.getElapsedTime().asMilliseconds() > 50)
@@ -131,6 +145,7 @@ void GameState::update(const float dt)
         gameText.setFillColor(sf::Color(statsColorValue, 150, 100));
         scoreText.setFillColor(sf::Color(statsColorValue, 150, 100));
         livesText.setFillColor(sf::Color(statsColorValue, 150, 100));
+        wpmText.setFillColor(sf::Color(statsColorValue, 150, 100));
         progressionRect.setFillColor(sf::Color(0, 255, statsColorValue));
         staticProgressionRect.setFillColor(sf::Color(255, 0, statsColorValue));
         progressionText.setFillColor(sf::Color(0, 0 , statsColorValue));
@@ -155,17 +170,17 @@ void GameState::update(const float dt)
     // Progression bar increase animation
     if (wordCompleted)
     {
-        if (progressionRectSize.y >= oldProgressionRectSize.y + (720.0f / 2.0f / WORDS_PER_LEVEL))
+        if (progressionRectSize.y >= oldProgressionRectSize.y + (this->stateMachine->window.getSize().y * 0.6 / WORDS_PER_LEVEL))
         {
             wordCompleted = false;
-            progressionRectSize.y = oldProgressionRectSize.y = oldProgressionRectSize.y + (720.0f / 2.0f / WORDS_PER_LEVEL);
+            progressionRectSize.y = oldProgressionRectSize.y = oldProgressionRectSize.y + (this->stateMachine->window.getSize().y * 0.6 / WORDS_PER_LEVEL);
         }
         else
         {
             progressionRectSize.y = progressionRectSize.y + 1.0f;
-            progressionRectSize = sf::Vector2f(50.0f, progressionRectSize.y);
-            progressionRect = thor::Shapes::roundedRect(progressionRectSize, 5.0f, sf::Color(sf::Color::Green));
-            progressionRect.setPosition(sf::Vector2f(75.0f, this->stateMachine->window.getSize().y - 150.0f));
+            progressionRectSize = sf::Vector2f(progressionRectSize.x, progressionRectSize.y);
+            progressionRect = thor::Shapes::roundedRect(progressionRectSize, 5.0f, sf::Color(0, 255, statsColorValue));
+            progressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.84f));
             progressionRect.rotate(180.0f);
         }
     }
@@ -205,12 +220,29 @@ void GameState::handleInput()
             /* Resize the window */
             case sf::Event::Resized:
             {
-                menuView.setSize(event.size.width, event.size.height);
-                this->stateMachine->background.setPosition(this->stateMachine->window.mapPixelToCoords(sf::Vector2i(0, 0)));
-                this->stateMachine->background.setScale(
-                        float(event.size.width) / float(this->stateMachine->background.getTexture()->getSize().x),
-                        float(event.size.height) / float(this->stateMachine->background.getTexture()->getSize().y));
-                break;
+              sf::Vector2f pos = sf::Vector2f(this->stateMachine->window.getSize());
+              menuView.setSize(pos);
+              pos *= 0.5f;
+              menuView.setCenter(pos);
+              gameText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.4f, this->stateMachine->window.getSize().y * 0.95f));
+              scoreText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.95f));
+              livesText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.9f, this->stateMachine->window.getSize().y * 0.95f));
+              wpmText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.7f, this->stateMachine->window.getSize().y * 0.95f));
+              progressionText.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.02f, this->stateMachine->window.getSize().y * 0.85f));
+              limitRect.setPosition(sf::Vector2f(0, this->stateMachine->window.getSize().y * 0.92f));
+              limitRect.setSize(sf::Vector2f(this->stateMachine->window.getSize().x, 10));
+              staticProgressionRect = thor::Shapes::roundedRect(sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, this->stateMachine->window.getSize().y * 0.6), 5.0f, sf::Color(sf::Color::Red));
+              staticProgressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.84f));
+              staticProgressionRect.rotate(180);
+              progressionRectSize = sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, progressionRectSize.y);
+              progressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, this->stateMachine->window.getSize().y * 0.84f));
+              progressionRect = thor::Shapes::roundedRect(progressionRectSize, 5.0f, sf::Color(sf::Color::Green));
+              progressionRect.rotate(180);
+              //for (WordState& drawnWord: drawnWords)
+              //{
+              //  drawnWord.wordXpos = rand_r(time(0)) % (static_cast<int>(this->stateMachine->background.getTexture()->getSize().x * 0.7f)) + 50;
+              //}
+              break;
             }
 
             case sf::Event::TextEntered:
@@ -237,6 +269,7 @@ void GameState::handleInput()
                 // Character attempt
                 else
                 {
+                    gameStatistics.allTypedChars++;
                     // New word
                     if (gameConfig.focusedWord.empty() && !drawnWords.empty())
                     {
@@ -271,6 +304,7 @@ void GameState::handleInput()
 
                         // bad char
                         LOG4CPLUS_TRACE(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "wrong char: " << drawnWords[0].wordString[0]);
+                        gameStatistics.wrongTypedChars++;
                         drawnWords[0].word.clear();
                         drawnWords[0].error = true;
                         drawnWords[0].wordChars[0] = TMConfig::gameWordErrorColor;
@@ -326,16 +360,16 @@ void GameState::handleInput()
                                             gameConfig.focusedWord.clear();
                                             gameStatistics.score = gameStatistics.score + 50;
                                             scoreText.setString(gameStatistics.scoreText + std::to_string(gameStatistics.score));
-                                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::CorrectWord]);
+                                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eCorrectWord]);
                                             sound.play();
                                             wordCompleted = true;
                                             gameStatistics.percentageProgression = gameStatistics.percentageProgression + 1.0f / WORDS_PER_LEVEL;
-                                            progressionText.setString(std::to_string(int(gameStatistics.percentageProgression * 100)) + gameStatistics.percentageProgressionText);
+                                            progressionText.setString(std::to_string(static_cast<int>(gameStatistics.percentageProgression * 100)) + gameStatistics.percentageProgressionText);
                                         }
 
                                         else
                                         {
-                                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::ErrorWord]);
+                                            sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eErrorWord]);
                                             sound.play();
                                         }
 
@@ -346,6 +380,7 @@ void GameState::handleInput()
                                 else
                                 {
                                     LOG4CPLUS_TRACE(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "wrong char: " << drawnWords[i].wordString[drawnWords[i].charIndex]);
+                                    gameStatistics.wrongTypedChars++;
                                     drawnWords[i].word.clear();
                                     drawnWords[i].error = true;
                                     drawnWords[i].wordChars[drawnWords[i].charIndex] = TMConfig::gameWordErrorColor;
@@ -369,7 +404,7 @@ void GameState::handleInput()
                                         livesText.setString(gameStatistics.livesText + std::to_string(gameStatistics.lives));
                                         gameStatistics.score = gameStatistics.score - 5;
                                         scoreText.setString(gameStatistics.scoreText + std::to_string(gameStatistics.score));
-                                        sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::ErrorWord]);
+                                        sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eErrorWord]);
                                         sound.play();
                                     }
                                     break;
@@ -458,7 +493,7 @@ void GameState::loadDictionary()
     file.close();
 }
 
-WordState GameState::spawnWord(const unsigned short wordLen)
+WordState GameState::spawnWord(const int16_t wordLen)
 {
     WordState gameWord;
     gameWord.wordString = dictionaryByLen[wordLen][rand() % dictionaryByLen[wordLen].size()];
@@ -469,8 +504,8 @@ WordState GameState::spawnWord(const unsigned short wordLen)
     LOG4CPLUS_TRACE(log4cplus::Logger::getInstance(LOG4CPLUS_TEXT("TypingManiac")), "word spawned: " << gameWord.wordString.c_str());
 
     gameWord.wordYPos = 0.0f;
-    gameWord.wordXpos = rand() % (this->stateMachine->background.getTexture()->getSize().x - 230) + 50;
-    gameWord.word.setFont(this->stateMachine->fonts[TMAssets::FontType::Minecraft]);
+    gameWord.wordXpos = rand_r(time(0)) % (static_cast<int>(this->stateMachine->background.getTexture()->getSize().x * 0.7f)) + 50;
+    gameWord.word.setFont(this->stateMachine->fonts[TMAssets::FontType::eMinecraft]);
     gameWord.word.clear();
     for (int i = 0; i < gameWord.wordString.size(); ++i) {
         gameWord.word << gameWord.wordChars[i] << gameWord.wordString[i] << " ";
@@ -493,8 +528,9 @@ void GameState::goToPauseMenu()
     gamePaused = true;
     gameStopWatch.stop();
     statsStopWatch.stop();
+    wpmStopWatch.stop();
     inGameMusic.pause();
-    sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::MenuPause]);
+    sound.setBuffer(this->stateMachine->sounds[TMAssets::SoundType::eMenuPause]);
     sound.play();
     this->stateMachine->pushState(new PauseMenuState(this->stateMachine));
 }
@@ -513,10 +549,15 @@ void GameState::updateNextLevel()
     gameConfig.incrementSpeed = gameConfig.incrementSpeed + 0.5f;
     gameStatistics.percentageProgression = 0.0f;
     gameStatistics.lives = 3;
+    gameStatistics.allTypedChars = 0.0f;
+    gameStatistics.wrongTypedChars = 0.0f;
     wordCompleted = false;
-    oldProgressionRectSize = progressionRectSize = sf::Vector2f(50.0f, 0.0f);
+    wpmRefreshCounter = 1;
+    oldProgressionRectSize = progressionRectSize = sf::Vector2f(this->stateMachine->window.getSize().x * 0.04f, 0.0f);
     progressionRect = thor::Shapes::roundedRect(progressionRectSize, 0.0f, sf::Color(sf::Color::Green));
-    progressionRect.setPosition(sf::Vector2f(75.0f, this->stateMachine->window.getSize().y - 150.0f));
+    progressionRect.setPosition(sf::Vector2f(this->stateMachine->window.getSize().x * 0.05f, this->stateMachine->window.getSize().y * 0.84f));
     progressionRect.rotate(180.0f);
-    progressionText.setString(std::to_string(int(gameStatistics.percentageProgression)) + gameStatistics.percentageProgressionText);
+    progressionText.setString(std::to_string(static_cast<int>(gameStatistics.percentageProgression)) + gameStatistics.percentageProgressionText);
+    drawnWords.clear();
+    gameConfig.focusedWord.clear();
 }
