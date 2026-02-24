@@ -19,15 +19,18 @@
 
 ## 🎮 How to Play
 
-Words fall from the top of the screen. Type them correctly to destroy them before they reach the bottom.
+Words fall from the top of the screen. Type them letter-by-letter to destroy them before they reach the bottom. **One mistake costs you!**
 
 ### Power-Ups
 
+Collect books to activate special powers:
+
 | Power | Effect |
 |-------|--------|
-| 🔥 **Fire** | Destroys all visible words |
-| ❄️ **Ice** | Slows falling words |
-| 💨 **Wind** | Pushes words back up |
+| 🔥 **Fire** | Burns all words on screen |
+| ❄️ **Ice** | Freezes words in place |
+| 🐢 **Slow** | Slows falling words |
+| 💨 **Wind** | Removes your typing errors |
 
 ---
 

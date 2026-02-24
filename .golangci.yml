@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 
 run:
   timeout: 5m
@@ -12,9 +12,3 @@ linters:
     - staticcheck
     - ineffassign
     - unused
-
-linters-settings:
-  gofmt:
-    simplify: true
-  goimports:
-    local-prefixes: typingmaniac
