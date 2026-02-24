@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-**Typing Maniac** - A web-based recreation of the classic Facebook game by MetroGames. Words fall from the top of the screen and players type them to destroy them. The game features power-ups (fire, ice, wind) and progressive difficulty.
+**Typing Maniac** - A web-based recreation of the classic Facebook game by MetroGames. Words fall from the top of the screen and players type them letter-by-letter to destroy them. One mistake costs you! The game features power-ups (fire, ice, slow, wind) collected as books.
 
 ## Tech Stack
 
-- **Language**: Go 1.21+
+- **Language**: Go 1.26+
 - **Game Engine**: Ebiten (https://ebiten.org/)
 - **Web Target**: Go → WebAssembly (GOOS=js GOARCH=wasm)
 - **Desktop Target**: Native Go
@@ -14,11 +14,14 @@
 ## Prerequisites
 
 ```bash
-# Install Go 1.21+ (required)
-# Ubuntu/Debian:
-sudo apt install golang-go
+# Install Go 1.26+ (required)
+# Download from https://go.dev/dl/
 
-# Or download from https://go.dev/dl/
+# Linux desktop dependencies
+sudo apt-get install -y libgl1-mesa-dev xorg-dev libasound2-dev
+
+# Install golangci-lint (recommended)
+curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh
 ```
 
 ## Build Commands
@@ -26,19 +29,32 @@ sudo apt install golang-go
 ```bash
 # Run desktop version (development)
 make run
-# Or: go run .
 
 # Build desktop executable
 make build
-# Or: go build -o typingmaniac .
 
 # Build for web (WASM)
 make wasm
-# Or: tinygo build -o web/game.wasm -target wasm ./...
 
 # Serve web version locally
 make serve
-# Or: python3 -m http.server 8080 -d web
+# Open http://localhost:8080
+
+# Lint code
+make lint
+
+# Format code
+make fmt
+```
+
+## Pre-Commit Checklist
+
+Before committing, always run:
+
+```bash
+make fmt   # Format code
+make lint  # Check for issues
+go test ./...  # Run tests
 ```
 
 ## Project Structure
@@ -49,7 +65,7 @@ make serve
 ├── game/
 │   ├── game.go          # Game logic, state management
 │   ├── word.go          # Word spawning, movement, typing
-│   ├── powerup.go       # Power-up logic (fire, ice, wind)
+│   ├── powerup.go       # Power-up logic (fire, ice, slow, wind)
 │   └── ui.go            # UI rendering (score, lives, powers)
 ├── assets/
 │   ├── fonts/           # TTF fonts
@@ -96,9 +112,6 @@ func loadDictionary(path string) ([]string, error) {
     }
     // ...
 }
-
-// Use context for cancellation (if needed)
-// Prefer channels for goroutine communication
 ```
 
 ### Ebiten Game Structure
@@ -108,7 +121,6 @@ type Game struct {
     // State fields
 }
 
-// Required interface methods:
 func (g *Game) Update() error {
     // Game logic, called 60 times per second
     return nil
@@ -122,22 +134,12 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
     // Logical screen size
     return ScreenWidth, ScreenHeight
 }
-
-func main() {
-    ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
-    ebiten.SetWindowTitle("Typing Maniac")
-    if err := ebiten.RunGame(NewGame()); err != nil {
-        log.Fatal(err)
-    }
-}
 ```
 
 ### Web/WASM Considerations
 
 - **No file system access** - embed assets using `//go:embed`
 - **No os/exec** - not available in WASM
-- **Limited goroutines** - TinyGo has limited concurrency support
-- **No cgo** - not available in TinyGo WASM
 
 ```go
 // Embed assets for WASM compatibility
@@ -185,13 +187,19 @@ const (
 
 ## Power-Up Types
 
-1. **Fire** - Destroys all visible words
-2. **Ice** - Slows falling words for N seconds
-3. **Wind** - Pushes words back up
+Collected as books during gameplay:
+
+| Power | Effect |
+|-------|--------|
+| 🔥 Fire | Burns all words on screen |
+| ❄️ Ice | Freezes words in place |
+| 🐢 Slow | Slows falling words |
+| 💨 Wind | Removes typing errors |
 
 ## Development Workflow
 
 1. Develop and test on desktop (`make run`)
-2. Periodically test WASM build (`make wasm && make serve`)
-3. Test in browser at http://localhost:8080
-4. Commit working versions
+2. Run linter before committing (`make lint`)
+3. Periodically test WASM build (`make wasm && make serve`)
+4. Test in browser at http://localhost:8080
+5. Commit working versions

@@ -1,4 +1,4 @@
-.PHONY: run build wasm serve clean
+.PHONY: run build wasm serve clean lint fmt
 
 # Desktop build
 run:
@@ -14,6 +14,13 @@ wasm:
 
 serve:
 	python3 -m http.server 8080 -d web
+
+# Linting and formatting
+lint:
+	golangci-lint run
+
+fmt:
+	golangci-lint fmt
 
 clean:
 	rm -f typingmaniac web/game.wasm
