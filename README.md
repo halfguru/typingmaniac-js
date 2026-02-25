@@ -6,12 +6,9 @@
 
 *Words fall. You type. They vanish.*
 
-[![Go](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev/)
-[![Ebitengine](https://img.shields.io/badge/Ebitengine-v2-00ADD8?style=flat)](https://ebitengine.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
+[![Phaser](https://img.shields.io/badge/Phaser-3.70-3178C6?style=flat)](https://phaser.io/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Build](https://github.com/halfguru/typingmaniac-go/actions/workflows/build.yml/badge.svg)](https://github.com/halfguru/typingmaniac-go/actions/workflows/build.yml)
-
-<img src="https://img.shields.io/badge/platform-web%20%7C%20desktop-lightgrey?style=flat" alt="Platform">
 
 </div>
 
@@ -36,20 +33,12 @@ Collect books to activate special powers:
 
 ## 🚀 Quick Start
 
-### Desktop
-
 ```bash
-make run
+npm install
+npm run dev
 ```
 
-### Web (WASM)
-
-```bash
-make wasm    # Build WebAssembly
-make serve   # Start server at http://localhost:8080
-```
-
-Then open http://localhost:8080 in your browser.
+Open http://localhost:3000 in your browser.
 
 ---
 
@@ -57,16 +46,9 @@ Then open http://localhost:8080 in your browser.
 
 | Component | Technology |
 |-----------|------------|
-| Language | [Go](https://go.dev/) |
-| Game Engine | [Ebitengine](https://ebitengine.org/) |
-| Web Target | WebAssembly |
-
----
-
-## 📋 Prerequisites
-
-- Go 1.26+
-- For Linux desktop: `libgl1-mesa-dev`, `xorg-dev`, `libasound2-dev`
+| Language | [TypeScript](https://www.typescriptlang.org/) |
+| Game Engine | [Phaser 3](https://phaser.io/) |
+| Bundler | [Vite](https://vitejs.dev/) |
 
 ---
 
@@ -74,14 +56,14 @@ Then open http://localhost:8080 in your browser.
 
 ```
 .
-├── main.go           # Game entry point
-├── game/             # Game logic
-├── web/              # WebAssembly build output
-│   ├── index.html
-│   ├── game.wasm
-│   └── wasm_exec.js
-├── Makefile
-└── go.mod
+├── src/
+│   ├── main.ts           # Entry point
+│   ├── scenes/           # Phaser scenes
+│   ├── config/           # Game config, colors, words
+│   └── types/            # TypeScript types
+├── index.html
+├── package.json
+└── vite.config.ts
 ```
 
 ---
