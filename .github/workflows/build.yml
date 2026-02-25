@@ -10,48 +10,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-dev xorg-dev libasound2-dev
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          go-version-file: 'go.mod'
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Download dependencies
-        run: go mod download
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
 
       - name: Build
-        run: go build -v ./...
-
-      - name: Test
-        run: go test -v ./...
-
-  wasm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: 'go.mod'
-
-      - name: Download dependencies
-        run: go mod download
-
-      - name: Build WASM
-        run: GOOS=js GOARCH=wasm go build -o web/game.wasm .
-
-      - name: Copy wasm_exec.js
-        run: cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web/
-
-      - name: Upload WASM artifacts
-        uses: actions/upload-artifact@v6
-        with:
-          name: wasm-build
-          path: web/
+        run: npm run build

@@ -1,18 +1,8 @@
-# Binaries
-typingmaniac
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+# Dependencies
+node_modules/
 
 # Build output
-web/game.wasm
-
-# Go
-*.test
-*.out
-go.work
+dist/
 
 # IDE
 .idea/
@@ -27,3 +17,8 @@ Thumbs.db
 
 # Logs
 *.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
