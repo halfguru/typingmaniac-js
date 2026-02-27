@@ -3,22 +3,12 @@ import type { PowerType, GameState as GState } from '../types';
 import { wordService } from '../services/WordService';
 import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
+import { GameConfigService } from '../services/GameConfigService';
 import {
   GAME_AREA_WIDTH,
   GAME_WIDTH,
   GAME_HEIGHT,
   DANGER_ZONE_Y,
-  BASE_FALL_SPEED,
-  SPAWN_DELAY_BASE,
-  LIMIT_PCT_PER_MISSED,
-  PROGRESS_PCT_PER_WORD,
-  POWER_DROP_RATE_BASE,
-  POWER_DROP_RATE_PER_LEVEL,
-  POWER_DROP_RATE_MAX,
-  POWER_DURATION_ICE,
-  POWER_DURATION_SLOW,
-  SLOW_FACTOR,
-  FIRE_POINTS_PER_WORD,
   POWER_KEYS,
   FONT_FAMILY,
   FONT_SIZE,
@@ -57,13 +47,6 @@ export class GameScene extends Phaser.Scene {
   combo = 0;
   private slowOverlay?: Phaser.GameObjects.Graphics;
   private iceOverlay?: Phaser.GameObjects.Graphics;
-
-  private readonly COMBO_LEVELS = [
-    { min: 1, text: 'GOOD', color: '#4CAF50', multiplier: 1.2 },
-    { min: 3, text: 'GREAT', color: '#2196F3', multiplier: 1.5 },
-    { min: 5, text: 'PERFECT', color: '#FF9800', multiplier: 2 },
-    { min: 8, text: 'FANTASTIC', color: '#E91E63', multiplier: 3 },
-  ];
 
   constructor() {
     super({ key: 'GameScene' });
@@ -293,7 +276,13 @@ export class GameScene extends Phaser.Scene {
 
     if (event.key === 'Backspace') {
       this.typedInput = this.typedInput.slice(0, -1);
+      audioService.playKeypress();
       this.updateInputDisplay();
+      return;
+    }
+
+    if (event.code === 'Enter') {
+      this.submitWord();
       return;
     }
 
@@ -301,8 +290,84 @@ export class GameScene extends Phaser.Scene {
       this.typedInput += event.key.toLowerCase();
       audioService.playKeypress();
       this.updateInputDisplay();
-      this.checkWordMatch();
     }
+  }
+
+  submitWord() {
+    if (this.typedInput.length === 0) return;
+
+    const powerType = POWER_KEYS[this.typedInput.toUpperCase()];
+    if (powerType && this.hasPowerInStack(powerType)) {
+      this.activatePower(powerType);
+      this.typedInput = '';
+      this.updateInputDisplay();
+      return;
+    }
+
+    const targetWord = this.findTargetWord();
+    if (targetWord && targetWord.textValue.toLowerCase() === this.typedInput.toLowerCase()) {
+      this.onWordComplete(targetWord);
+    } else {
+      this.showWrongWordPopup(targetWord);
+      this.typedInput = '';
+      this.updateInputDisplay();
+    }
+  }
+
+  showWrongWordPopup(targetWord: WordObject | null) {
+    let x: number;
+    let y: number;
+
+    if (targetWord) {
+      const totalWidth = targetWord.letters.reduce((sum, l) => sum + l.width, 0);
+      x = targetWord.x + totalWidth + 20;
+      y = targetWord.y;
+    } else {
+      x = GAME_AREA_WIDTH / 2;
+      y = GAME_HEIGHT / 2;
+    }
+
+    const missText = this.add.text(x, y, 'MISS', {
+      fontFamily: FONT_FAMILY,
+      fontSize: '36px',
+      color: '#ff4444',
+      fontStyle: 'bold',
+    });
+    missText.setOrigin(0, 0.5);
+    missText.setDepth(100);
+    missText.setShadow(0, 0, '#ff0000', 10, true, true);
+
+    this.tweens.add({
+      targets: missText,
+      y: y - 50,
+      alpha: 0,
+      duration: 700,
+      ease: 'Power2',
+      onComplete: () => missText.destroy(),
+    });
+
+    this.flashInputRed();
+    audioService.playWordMissed();
+  }
+
+  flashInputRed() {
+    const containerW = 600;
+    const containerH = 60;
+    const containerX = GAME_AREA_WIDTH / 2 - containerW / 2;
+    const containerY = GAME_HEIGHT - 90;
+
+    const flash = this.add.graphics();
+    flash.fillStyle(0xff4444, 0.5);
+    flash.fillRoundedRect(containerX, containerY, containerW, containerH, 12);
+    flash.setDepth(99);
+
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      duration: 300,
+      ease: 'Power2',
+      onComplete: () => flash.destroy(),
+    });
   }
 
   updateInputDisplay() {
@@ -320,21 +385,6 @@ export class GameScene extends Phaser.Scene {
       yoyo: true,
       ease: 'Power1',
     });
-  }
-
-  checkWordMatch() {
-    const powerType = POWER_KEYS[this.typedInput.toUpperCase()];
-    if (powerType && this.hasPowerInStack(powerType)) {
-      this.activatePower(powerType);
-      this.typedInput = '';
-      this.updateInputDisplay();
-      return;
-    }
-
-    const targetWord = this.findTargetWord();
-    if (targetWord && targetWord.textValue.toLowerCase() === this.typedInput.toLowerCase()) {
-      this.onWordComplete(targetWord);
-    }
   }
 
   hasPowerInStack(power: PowerType): boolean {
@@ -382,7 +432,7 @@ export class GameScene extends Phaser.Scene {
 
     switch (power) {
       case 'fire':
-        this.score += this.words.length * FIRE_POINTS_PER_WORD;
+        this.score += this.words.length * GameConfigService.getFirePointsPerWord();
         this.words.forEach(w => {
           this.showFireParticles(w.x + w.letters.reduce((sum, l) => sum + l.width, 0) / 2, w.y);
           w.letters.forEach(l => l.destroy());
@@ -403,12 +453,12 @@ export class GameScene extends Phaser.Scene {
           w.frozenIndicator.setOrigin(0.5, 0.5);
           w.frozenIndicator.setDepth(2);
         });
-        this.powerTimer = POWER_DURATION_ICE;
+        this.powerTimer = GameConfigService.getIceDuration();
         break;
       case 'slow':
         this.showSlowOverlay();
-        this.slowFactor = SLOW_FACTOR;
-        this.powerTimer = POWER_DURATION_SLOW;
+        this.slowFactor = GameConfigService.getSlowFactor();
+        this.powerTimer = GameConfigService.getSlowDuration();
         break;
       case 'wind':
         this.showWindEffect();
@@ -438,12 +488,12 @@ export class GameScene extends Phaser.Scene {
   onWordComplete(word: WordObject) {
     this.combo++;
 
-    const comboLevel = this.getComboLevel();
-    const basePoints = word.textValue.length * 10;
+    const comboLevel = GameConfigService.getComboLevel(this.combo);
+    const basePoints = word.textValue.length * GameConfigService.getPointsPerLetter();
     const points = Math.floor(basePoints * (comboLevel?.multiplier || 1));
     this.score += points;
     this.wordsCompleted++;
-    this.progressPct += PROGRESS_PCT_PER_WORD;
+    this.progressPct += GameConfigService.getProgressPctPerWord(this.level);
     if (this.progressPct > 100) this.progressPct = 100;
 
     audioService.playWordComplete();
@@ -479,15 +529,6 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.events.emit('gameDataUpdate', this.getGameData());
-  }
-
-  getComboLevel(): { text: string; color: string; multiplier: number } | null {
-    for (let i = this.COMBO_LEVELS.length - 1; i >= 0; i--) {
-      if (this.combo >= this.COMBO_LEVELS[i].min) {
-        return this.COMBO_LEVELS[i];
-      }
-    }
-    return null;
   }
 
   showComboPopup(x: number, y: number, text: string, color: string) {
@@ -549,7 +590,10 @@ export class GameScene extends Phaser.Scene {
     if (this.activePower === 'ice') return;
 
     this.spawnTimer += delta;
-    const spawnDelay = Math.max(SPAWN_DELAY_BASE - this.level * 5, 30) * (1000 / 60);
+    const spawnDelay = Math.max(
+      GameConfigService.getSpawnDelayBase() - this.level * GameConfigService.getSpawnDelayDecreasePerLevel(),
+      GameConfigService.getMinSpawnDelay()
+    ) * (1000 / 60);
 
     if (this.spawnTimer >= spawnDelay) {
       this.spawnTimer = 0;
@@ -558,12 +602,18 @@ export class GameScene extends Phaser.Scene {
   }
 
   createWord() {
-    const wordLength = Math.min(4 + Math.floor((this.level - 1) / 3), 10);
+    const wordLength = Math.min(
+      GameConfigService.getBaseWordLength() + Math.floor((this.level - 1) / GameConfigService.getWordLengthIncreasePerLevels()),
+      GameConfigService.getMaxWordLength()
+    );
     const textValue = wordService.getWord(wordLength);
-    const speed = (BASE_FALL_SPEED + (this.level - 1) * 0.15) * (0.8 + Math.random() * 0.4);
+    const speed = (GameConfigService.getBaseFallSpeed() + (this.level - 1) * GameConfigService.getSpeedIncreasePerLevel()) * (0.8 + Math.random() * 0.4);
 
     let power: PowerType = 'none';
-    const dropRate = Math.min(POWER_DROP_RATE_BASE + (this.level - 1) * POWER_DROP_RATE_PER_LEVEL, POWER_DROP_RATE_MAX);
+    const dropRate = Math.min(
+      GameConfigService.getPowerDropRateBase() + (this.level - 1) * GameConfigService.getPowerDropRateIncreasePerLevel(),
+      GameConfigService.getPowerDropRateMax()
+    );
     if (Math.random() < dropRate) {
       const powers: PowerType[] = ['fire', 'ice', 'wind', 'slow'];
       power = powers[Math.floor(Math.random() * powers.length)];
@@ -693,8 +743,9 @@ export class GameScene extends Phaser.Scene {
         this.wordsMissed++;
         this.combo = 0;
         this.showMissedWordEffect(word);
+        this.showMissPopup(word.x + 50, word.y);
         audioService.playWordMissed();
-        this.limitPct += LIMIT_PCT_PER_MISSED;
+        this.limitPct += GameConfigService.getLimitPctPerMissed();
         if (this.limitPct >= 100) {
           this.limitPct = 100;
           this.gameState = 'gameOver';
@@ -715,6 +766,27 @@ export class GameScene extends Phaser.Scene {
     if (toRemove.length > 0) {
       this.events.emit('gameDataUpdate', this.getGameData());
     }
+  }
+
+  showMissPopup(x: number, y: number) {
+    const missText = this.add.text(x, y, 'MISS', {
+      fontFamily: FONT_FAMILY,
+      fontSize: '36px',
+      color: '#ff4444',
+      fontStyle: 'bold',
+    });
+    missText.setOrigin(0, 0.5);
+    missText.setDepth(100);
+    missText.setShadow(0, 0, '#ff0000', 10, true, true);
+
+    this.tweens.add({
+      targets: missText,
+      y: y - 60,
+      alpha: 0,
+      duration: 800,
+      ease: 'Power2',
+      onComplete: () => missText.destroy(),
+    });
   }
 
   showMissedWordEffect(word: WordObject) {
@@ -756,14 +828,54 @@ export class GameScene extends Phaser.Scene {
       for (let i = 0; i < word.letters.length; i++) {
         if (i < matchedLen) {
           word.letters[i].setColor('#4CAF50');
-        } else if (isTarget) {
-          word.letters[i].setColor('#4fc3f7');
-        } else if (word.frozen) {
-          word.letters[i].setColor('#a8e6ff');
         } else {
           word.letters[i].setColor('#ffffff');
         }
       }
+
+      if (word.container && word.power !== 'none') {
+        this.redrawWordContainer(word, isTarget);
+      }
+    }
+  }
+
+  redrawWordContainer(word: WordObject, isFocused: boolean) {
+    const totalWidth = word.letters.reduce((sum, l) => sum + l.width, 0);
+    const padding = 14;
+    const containerW = totalWidth + padding * 2;
+    const containerH = 44;
+    const centerX = word.x + totalWidth / 2;
+    const containerX = centerX - containerW / 2;
+    const containerY = word.y - 2;
+
+    const powerColors: Record<PowerType, number> = {
+      none: 0,
+      fire: COLORS.POWER_FIRE,
+      ice: COLORS.POWER_ICE,
+      wind: COLORS.POWER_WIND,
+      slow: COLORS.POWER_SLOW,
+    };
+
+    word.container!.clear();
+    
+    if (isFocused) {
+      word.container!.fillStyle(0x000000, 0.6);
+      word.container!.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
+      word.container!.fillStyle(0x4fc3f7, 1);
+      word.container!.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
+      word.container!.lineStyle(3, 0xffffff, 0.8);
+      word.container!.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
+      word.container!.fillStyle(0xffffff, 0.25);
+      word.container!.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
+    } else {
+      word.container!.fillStyle(0x000000, 0.4);
+      word.container!.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
+      word.container!.fillStyle(powerColors[word.power], 1);
+      word.container!.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
+      word.container!.lineStyle(2, 0xffffff, 0.3);
+      word.container!.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
+      word.container!.fillStyle(0xffffff, 0.2);
+      word.container!.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
     }
   }
 

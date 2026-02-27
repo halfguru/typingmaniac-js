@@ -861,7 +861,7 @@ export class UIScene extends Phaser.Scene {
     const stats: { label: string; value: number; suffix: string; y: number }[] = [
       { label: 'Accuracy', value: accuracy, suffix: '%', y: -110 },
       { label: 'Bonus', value: accBonus, suffix: '', y: -50 },
-      { label: errorFree ? 'Error Free' : 'Errors', value: -1, suffix: errorFree ? ':)' : ':(', y: 10 },
+      { label: errorFree ? 'Error Free' : 'Errors', value: -1, suffix: errorFree ? '✅' : '❌', y: 10 },
       { label: 'Bonus', value: errBonus, suffix: '', y: 70 },
     ];
 
