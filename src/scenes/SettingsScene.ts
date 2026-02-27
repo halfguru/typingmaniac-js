@@ -4,7 +4,16 @@ import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 
 export class SettingsScene extends Phaser.Scene {
-  private sliders: { track: Phaser.GameObjects.Graphics; fill: Phaser.GameObjects.Graphics; handle: Phaser.GameObjects.Arc; value: number; type: 'master' | 'sfx' | 'music' }[] = [];
+  private sliders: {
+    track: Phaser.GameObjects.Graphics;
+    fill: Phaser.GameObjects.Graphics;
+    handle: Phaser.GameObjects.Arc;
+    value: number;
+    type: 'master' | 'sfx' | 'music';
+    valueText: Phaser.GameObjects.Text;
+    trackX: number;
+    trackW: number;
+  }[] = [];
 
   constructor() {
     super({ key: 'SettingsScene' });
@@ -107,7 +116,7 @@ export class SettingsScene extends Phaser.Scene {
     valueText.setShadow(0, 0, '#4fc3f7', 6, true, true);
   
     const sliderData = { track, fill, handle, value, type, valueText, trackX, trackW };
-    this.sliders.push(sliderData as any);
+    this.sliders.push(sliderData);
   
     const hitArea = this.add.rectangle(trackX, trackY, trackW + 40, 40, 0x000000, 0);
     hitArea.setInteractive({ useHandCursor: true, draggable: true });
