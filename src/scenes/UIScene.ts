@@ -6,45 +6,20 @@ import {
   GAME_AREA_WIDTH,
   MAX_POWER_STACK,
   FONT_FAMILY,
-  FONT_SMALL,
   POWER_SYMBOLS,
+  POWER_COLORS,
+  POWER_NAMES,
 } from '../config/constants';
-import type { PowerType } from '../types';
+import type { PowerType, GameData } from '../types';
 import { storageService } from '../services/StorageService';
-
-interface GameData {
-  score: number;
-  level: number;
-  limitPct: number;
-  progressPct: number;
-  powerStack: PowerType[];
-  wordsCompleted: number;
-  wordsMissed: number;
-  input: string;
-  gameState: string;
-}
-
-const POWER_COLORS: Record<PowerType, number> = {
-  none: 0x2a3a3a,
-  fire: 0xff6b35,
-  ice: 0x64b5f6,
-  wind: 0xba68c8,
-  slow: 0xffb74d,
-};
-
-const POWER_NAMES: Record<PowerType, string> = {
-  none: '',
-  fire: 'FIRE',
-  ice: 'ICE',
-  wind: 'WIND',
-  slow: 'SLOW',
-};
+import type { GameScene } from './GameScene';
+import { ProgressBar } from '../ui/ProgressBar';
 
 export class UIScene extends Phaser.Scene {
   private levelText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
-  private limitPctText!: Phaser.GameObjects.Text;
-  private progressPctText!: Phaser.GameObjects.Text;
+  private limitBar!: ProgressBar;
+  private progressBar!: ProgressBar;
   private powerBoxGraphics: Phaser.GameObjects.Graphics[] = [];
   private powerLabels: Phaser.GameObjects.Text[] = [];
  private powerContainers: Phaser.GameObjects.Container[] = [];
@@ -74,7 +49,7 @@ export class UIScene extends Phaser.Scene {
     this.createPowerBoxes();
     this.createProgressBars();
 
-    const gameScene = this.scene.get('GameScene') as any;
+    const gameScene = this.scene.get('GameScene') as GameScene;
     gameScene.events.on('gameDataUpdate', (data: GameData) => {
       this.updateUI(data);
     });
@@ -89,12 +64,8 @@ export class UIScene extends Phaser.Scene {
     this.displayedLevel = 1;
     this.scoreText.setText('0');
     this.levelText.setText('1');
-    this.currentLimitHeight = 0;
-    this.currentProgressHeight = 0;
-    this.drawLimitBar(0);
-    this.drawProgressBar(0);
-    this.limitPctText.setText('0%');
-    this.progressPctText.setText('0%');
+    this.limitBar.reset();
+    this.progressBar.reset();
     this.previousPowerStack = [];
     for (let i = 0; i < MAX_POWER_STACK; i++) {
       const graphics = this.powerBoxGraphics[i];
@@ -239,142 +210,47 @@ export class UIScene extends Phaser.Scene {
     }
   }
 
-  private limitBarGraphics!: Phaser.GameObjects.Graphics;
-  private progressBarGraphics!: Phaser.GameObjects.Graphics;
-  private currentLimitHeight = 0;
-  private currentProgressHeight = 0;
-
-  private limitBarX = 0;
-  private progressBarX = 0;
+  private barY = 705;
 
   createProgressBars() {
     const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
-    this.limitBarX = sidebarCenterX - 55;
-    this.progressBarX = sidebarCenterX + 55;
-    const limitBarX = this.limitBarX;
-    const progressBarX = this.progressBarX;
-    const barY = 705;
-    const barBottom = barY + this.progressBarH;
+    const limitBarX = sidebarCenterX - 55;
+    const progressBarX = sidebarCenterX + 55;
     const barW = this.progressBarW;
     const barH = this.progressBarH;
-    const radius = 8;
+    const barY = this.barY;
 
-    const drawBarContainer = (x: number, glowColor: number) => {
-      const outerGlow = this.add.graphics();
-      for (let i = 3; i >= 0; i--) {
-        outerGlow.fillStyle(glowColor, 0.05 - i * 0.01);
-        outerGlow.fillRoundedRect(x - barW / 2 - 8 - i * 2, barY - 8 - i * 2, barW + 16 + i * 4, barH + 16 + i * 4, radius + 8);
-      }
-
-      const container = this.add.graphics();
-      container.fillStyle(0x050a12, 1);
-      container.fillRoundedRect(x - barW / 2 - 4, barY - 4, barW + 8, barH + 8, radius + 4);
-      container.fillStyle(0x0a1520, 1);
-      container.fillRoundedRect(x - barW / 2, barY, barW, barH, radius);
-      container.lineStyle(2, glowColor, 0.4);
-      container.strokeRoundedRect(x - barW / 2, barY, barW, barH, radius);
-      for (let i = 1; i < 4; i++) {
-        const tickY = barY + (barH / 4) * i;
-        container.lineStyle(1, glowColor, 0.15);
-        container.lineBetween(x - barW / 2 + 4, tickY, x + barW / 2 - 4, tickY);
-      }
-      const shine = this.add.graphics();
-      shine.fillStyle(0xffffff, 0.05);
-      shine.fillRoundedRect(x - barW / 2 + 3, barY + 3, barW - 6, barH / 3, radius - 2);
-    };
-
-    drawBarContainer(limitBarX, 0xff4444);
-    drawBarContainer(progressBarX, 0x4ecdc4);
-
-    this.limitBarGraphics = this.add.graphics();
-    this.progressBarGraphics = this.add.graphics();
-
-    const limitLabel = this.add.text(limitBarX, 665, 'LIMIT', {
-      fontFamily: FONT_FAMILY,
-      fontSize: `${FONT_SMALL}px`,
-      color: '#ff6b6b',
-      fontStyle: 'bold',
+    this.limitBar = new ProgressBar(this, {
+      x: limitBarX,
+      y: barY + barH / 2,
+      width: barW,
+      height: barH,
+      fillColor: 0xff4444,
+      glowColor: 0xff4444,
+      bgColor: 0x0a1520,
+      label: 'LIMIT',
+      showValue: true,
+      orientation: 'vertical',
+      style: 'elaborate',
+      animated: true,
     });
-    limitLabel.setOrigin(0.5, 0);
-    limitLabel.setShadow(0, 0, '#ff4444', 6, true, true);
+    this.add.existing(this.limitBar);
 
-    this.limitPctText = this.add.text(limitBarX, barBottom + 38, '0%', {
-      fontFamily: FONT_FAMILY,
-      fontSize: '28px',
-      color: '#ff6b6b',
-      fontStyle: 'bold',
+    this.progressBar = new ProgressBar(this, {
+      x: progressBarX,
+      y: barY + barH / 2,
+      width: barW,
+      height: barH,
+      fillColor: 0x2ecc71,
+      glowColor: 0x4ecdc4,
+      bgColor: 0x0a1520,
+      label: 'PROG',
+      showValue: true,
+      orientation: 'vertical',
+      style: 'elaborate',
+      animated: true,
     });
-    this.limitPctText.setOrigin(0.5, 0);
-    this.limitPctText.setShadow(0, 0, '#ff4444', 8, true, true);
-
-    const progressLabel = this.add.text(progressBarX, 665, 'PROG', {
-      fontFamily: FONT_FAMILY,
-      fontSize: `${FONT_SMALL}px`,
-      color: '#4ecdc4',
-      fontStyle: 'bold',
-    });
-    progressLabel.setOrigin(0.5, 0);
-    progressLabel.setShadow(0, 0, '#4ecdc4', 6, true, true);
-
-    this.progressPctText = this.add.text(progressBarX, barBottom + 38, '0%', {
-      fontFamily: FONT_FAMILY,
-      fontSize: '28px',
-      color: '#4ecdc4',
-      fontStyle: 'bold',
-    });
-    this.progressPctText.setOrigin(0.5, 0);
-    this.progressPctText.setShadow(0, 0, '#4ecdc4', 8, true, true);
-
-    this.drawLimitBar(0);
-    this.drawProgressBar(0);
-  }
-
-  private drawLimitBar(height: number) {
-    const barY = 705;
-    const barW = this.progressBarW;
-    const barH = this.progressBarH;
-    const radius = 6;
-
-    this.limitBarGraphics.clear();
-    if (height < 2) return;
-
-    const x = this.limitBarX - barW / 2;
-    const bottomY = barY + barH;
-    const fillY = bottomY - height;
-    const cappedHeight = Math.min(height, barH - 4);
-
-    this.limitBarGraphics.fillStyle(0xff4444, 1);
-    this.limitBarGraphics.fillRoundedRect(x + 2, fillY, barW - 4, cappedHeight, { tl: radius, tr: radius, bl: 0, br: 0 });
-    if (cappedHeight > radius) {
-      this.limitBarGraphics.fillRect(x + 2, fillY + radius, barW - 4, cappedHeight - radius);
-    }
-
-    this.limitBarGraphics.fillStyle(0xffffff, 0.2);
-    this.limitBarGraphics.fillRect(x + 4, fillY + 3, 6, Math.min(cappedHeight - 6, 30));
-  }
-
-  private drawProgressBar(height: number) {
-    const barY = 705;
-    const barW = this.progressBarW;
-    const barH = this.progressBarH;
-    const radius = 6;
-
-    this.progressBarGraphics.clear();
-    if (height < 2) return;
-
-    const x = this.progressBarX - barW / 2;
-    const bottomY = barY + barH;
-    const fillY = bottomY - height;
-    const cappedHeight = Math.min(height, barH - 4);
-
-    this.progressBarGraphics.fillStyle(0x2ecc71, 1);
-    this.progressBarGraphics.fillRoundedRect(x + 2, fillY, barW - 4, cappedHeight, { tl: radius, tr: radius, bl: 0, br: 0 });
-    if (cappedHeight > radius) {
-      this.progressBarGraphics.fillRect(x + 2, fillY + radius, barW - 4, cappedHeight - radius);
-    }
-
-    this.progressBarGraphics.fillStyle(0xffffff, 0.2);
-    this.progressBarGraphics.fillRect(x + 4, fillY + 3, 6, Math.min(cappedHeight - 6, 30));
+    this.add.existing(this.progressBar);
   }
 
   updateUI(data: GameData) {
@@ -409,55 +285,8 @@ export class UIScene extends Phaser.Scene {
       this.displayedScore = toScore;
     }
 
-    const targetLimitHeight = (data.limitPct / 100) * this.progressBarH;
-    const targetProgressHeight = (data.progressPct / 100) * this.progressBarH;
-
-    const isResetting = data.progressPct === 0 && this.currentProgressHeight > 10;
-
-    if (isResetting) {
-      this.currentLimitHeight = 0;
-      this.currentProgressHeight = 0;
-      this.drawLimitBar(0);
-      this.drawProgressBar(0);
-      this.limitPctText.setText('0%');
-      this.progressPctText.setText('0%');
-    } else {
-      if (Math.abs(this.currentLimitHeight - targetLimitHeight) > 1) {
-        this.tweens.addCounter({
-          from: this.currentLimitHeight,
-          to: targetLimitHeight,
-          duration: 200,
-          ease: 'Power2',
-          onUpdate: (tween) => {
-            const height = tween.getValue() ?? targetLimitHeight;
-            this.drawLimitBar(height);
-            const pct = Math.round((height / this.progressBarH) * 100);
-            this.limitPctText.setText(`${pct}%`);
-          },
-          onComplete: () => {
-            this.currentLimitHeight = targetLimitHeight;
-          },
-        });
-      }
-
-      if (Math.abs(this.currentProgressHeight - targetProgressHeight) > 1) {
-        this.tweens.addCounter({
-          from: this.currentProgressHeight,
-          to: targetProgressHeight,
-          duration: 200,
-          ease: 'Power2',
-          onUpdate: (tween) => {
-            const height = tween.getValue() ?? targetProgressHeight;
-            this.drawProgressBar(height);
-            const pct = Math.round((height / this.progressBarH) * 100);
-            this.progressPctText.setText(`${pct}%`);
-          },
-          onComplete: () => {
-            this.currentProgressHeight = targetProgressHeight;
-          },
-        });
-      }
-    }
+    this.limitBar.setValue(data.limitPct, true);
+    this.progressBar.setValue(data.progressPct, true);
 
     const usedPowerIndex = this.findUsedPowerIndex(this.previousPowerStack, data.powerStack);
     if (usedPowerIndex !== -1 && usedPowerIndex < this.powerContainers.length) {
@@ -555,7 +384,7 @@ export class UIScene extends Phaser.Scene {
   showGameOver() {
     if (this.gameOverOverlay) return;
 
-    const gameScene = this.scene.get('GameScene') as any;
+    const gameScene = this.scene.get('GameScene') as GameScene;
     const finalScore = gameScene.score;
     const finalLevel = gameScene.level;
     const isNewHighScore = storageService.setHighScore(finalScore);
@@ -834,12 +663,11 @@ export class UIScene extends Phaser.Scene {
     scrollGlow.fillRoundedRect(scrollX - scrollW / 2 + 10, scrollY - scrollH / 2 + 10, scrollW - 20, scrollH - 20, 15);
     this.levelCompleteOverlay.add(scrollGlow);
 
-    const gameScene = this.scene.get('GameScene') as any;
+    const gameScene = this.scene.get('GameScene') as GameScene;
     const currentScore = gameScene.score;
     const accuracy = gameScene.calculateAccuracy();
     const accBonus = gameScene.calculateAccuracyBonus();
     const errorFree = gameScene.isErrorFree();
-    const errBonus = gameScene.calculateErrorFreeBonus();
     const bonusTotal = gameScene.calculateLevelTotal();
     const finalScore = currentScore + bonusTotal;
 
@@ -859,10 +687,9 @@ export class UIScene extends Phaser.Scene {
     this.levelCompleteOverlay.add(divider);
 
     const stats: { label: string; value: number; suffix: string; y: number }[] = [
-      { label: 'Accuracy', value: accuracy, suffix: '%', y: -110 },
-      { label: 'Bonus', value: accBonus, suffix: '', y: -50 },
-      { label: errorFree ? 'Error Free' : 'Errors', value: -1, suffix: errorFree ? '✅' : '❌', y: 10 },
-      { label: 'Bonus', value: errBonus, suffix: '', y: 70 },
+      { label: 'Accuracy', value: accuracy, suffix: '%', y: -80 },
+      { label: errorFree ? 'Error Free' : 'Errors', value: -1, suffix: errorFree ? '✅' : '❌', y: -20 },
+      { label: 'Bonus', value: accBonus, suffix: '', y: 40 },
     ];
 
     const valueTexts: Phaser.GameObjects.Text[] = [];

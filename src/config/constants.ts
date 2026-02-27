@@ -32,20 +32,7 @@ export const FONT_SMALL = 33;
 export const FONT_LARGE = 54;
 export const FONT_FAMILY = 'Fredoka, Arial, sans-serif';
 
-export const BASE_FALL_SPEED = 1.5;
-export const SPAWN_DELAY_BASE = 90;
 export const MAX_POWER_STACK = 6;
-
-export const LIMIT_PCT_PER_MISSED = 10;
-export const PROGRESS_PCT_PER_WORD = 12;
-export const POWER_DROP_RATE_BASE = 0.05;
-export const POWER_DROP_RATE_PER_LEVEL = 0.02;
-export const POWER_DROP_RATE_MAX = 0.25;
-
-export const POWER_DURATION_ICE = 5000;
-export const POWER_DURATION_SLOW = 5000;
-export const SLOW_FACTOR = 0.3;
-export const FIRE_POINTS_PER_WORD = 50;
 
 export const POWER_KEYS: Record<string, PowerType> = {
   FIRE: 'fire',
@@ -60,4 +47,20 @@ export const POWER_SYMBOLS: Record<PowerType, string> = {
   ice: '❄️',
   wind: '💨',
   slow: '⏱️',
+};
+
+export const POWER_COLORS: Record<PowerType, number> = {
+  none: 0x1a3a4a,
+  fire: COLORS.POWER_FIRE,
+  ice: COLORS.POWER_ICE,
+  wind: COLORS.POWER_WIND,
+  slow: COLORS.POWER_SLOW,
+};
+
+export const POWER_NAMES: Record<PowerType, string> = {
+  none: '',
+  fire: 'FIRE',
+  ice: 'ICE',
+  wind: 'WIND',
+  slow: 'SLOW',
 };
