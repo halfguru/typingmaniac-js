@@ -47,6 +47,7 @@ export class GameScene extends Phaser.Scene {
   combo = 0;
   private slowOverlay?: Phaser.GameObjects.Graphics;
   private iceOverlay?: Phaser.GameObjects.Graphics;
+  private levelStartScore = 0;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -646,43 +647,42 @@ export class GameScene extends Phaser.Scene {
     }
 
     const totalWidth = letterX - x;
-    let container: Phaser.GameObjects.Graphics | undefined;
-    if (power !== 'none') {
-      const powerColors: Record<PowerType, number> = {
-        none: 0,
-        fire: COLORS.POWER_FIRE,
-        ice: COLORS.POWER_ICE,
-        wind: COLORS.POWER_WIND,
-        slow: COLORS.POWER_SLOW,
-      };
-      const padding = 14;
-      const containerW = totalWidth + padding * 2;
-      const containerH = 44;
-      const centerX = x + totalWidth / 2;
-      const containerX = centerX - containerW / 2;
-      const containerY = y - 2;
+    const padding = 14;
+    const containerW = totalWidth + padding * 2;
+    const containerH = 44;
+    const centerX = x + totalWidth / 2;
+    const containerX = centerX - containerW / 2;
+    const containerY = y - 2;
 
-      container = this.add.graphics();
-      container.fillStyle(0x000000, 0.4);
-      container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
-      container.fillStyle(powerColors[power], 1);
-      container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-      container.lineStyle(2, 0xffffff, 0.3);
-      container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-      container.fillStyle(0xffffff, 0.2);
-      container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
+    const container = this.add.graphics();
+    
+    const powerColors: Record<PowerType, number> = {
+      none: 0x1a3a4a,
+      fire: COLORS.POWER_FIRE,
+      ice: COLORS.POWER_ICE,
+      wind: COLORS.POWER_WIND,
+      slow: COLORS.POWER_SLOW,
+    };
 
-      container.setDepth(0);
-      container.setAlpha(0);
-      letters.forEach(l => l.setDepth(1));
+    container.fillStyle(0x000000, 0.4);
+    container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
+    container.fillStyle(powerColors[power], 1);
+    container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
+    container.lineStyle(2, 0xffffff, power !== 'none' ? 0.3 : 0.15);
+    container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
+    container.fillStyle(0xffffff, power !== 'none' ? 0.2 : 0.1);
+    container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
 
-      this.tweens.add({
-        targets: container,
-        alpha: 1,
-        duration: 200,
-        ease: 'Power2',
-      });
-    }
+    container.setDepth(0);
+    container.setAlpha(0);
+    letters.forEach(l => l.setDepth(1));
+
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      duration: 200,
+      ease: 'Power2',
+    });
 
     this.tweens.add({
       targets: letters,
@@ -712,33 +712,6 @@ export class GameScene extends Phaser.Scene {
       if (!word.frozen) {
         word.y += word.speed * this.slowFactor * 60 * deltaSec;
         word.letters.forEach(l => l.setY(word.y));
-        if (word.container && word.power !== 'none') {
-          const totalWidth = word.letters.reduce((sum, l) => sum + l.width, 0);
-          const padding = 14;
-          const containerW = totalWidth + padding * 2;
-          const containerH = 44;
-          const centerX = word.x + totalWidth / 2;
-          const containerX = centerX - containerW / 2;
-          const containerY = word.y - 2;
-
-          const powerColors: Record<PowerType, number> = {
-            none: 0,
-            fire: COLORS.POWER_FIRE,
-            ice: COLORS.POWER_ICE,
-            wind: COLORS.POWER_WIND,
-            slow: COLORS.POWER_SLOW,
-          };
-
-          word.container.clear();
-          word.container.fillStyle(0x000000, 0.4);
-          word.container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
-          word.container.fillStyle(powerColors[word.power], 1);
-          word.container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-          word.container.lineStyle(2, 0xffffff, 0.3);
-          word.container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-          word.container.fillStyle(0xffffff, 0.2);
-          word.container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
-        }
       }
     }
   }
@@ -753,7 +726,7 @@ export class GameScene extends Phaser.Scene {
         this.showMissedWordEffect(word);
         this.showMissPopup(word.x + 50, word.y);
         audioService.playWordMissed();
-        this.limitPct += GameConfigService.getLimitPctPerMissed();
+        this.limitPct += GameConfigService.getProgressPctPerWord(this.level);
         if (this.limitPct >= 100) {
           this.limitPct = 100;
           this.gameState = 'gameOver';
@@ -841,13 +814,13 @@ export class GameScene extends Phaser.Scene {
         }
       }
 
-      if (word.container && word.power !== 'none') {
-        this.redrawWordContainer(word, isTarget);
-      }
+      this.redrawWordContainer(word, isTarget);
     }
   }
 
   redrawWordContainer(word: WordObject, isFocused: boolean) {
+    if (!word.container) return;
+
     const totalWidth = word.letters.reduce((sum, l) => sum + l.width, 0);
     const padding = 14;
     const containerW = totalWidth + padding * 2;
@@ -857,33 +830,27 @@ export class GameScene extends Phaser.Scene {
     const containerY = word.y - 2;
 
     const powerColors: Record<PowerType, number> = {
-      none: 0,
+      none: 0x1a3a4a,
       fire: COLORS.POWER_FIRE,
       ice: COLORS.POWER_ICE,
       wind: COLORS.POWER_WIND,
       slow: COLORS.POWER_SLOW,
     };
 
-    word.container!.clear();
+    word.container.clear();
     
+    word.container.fillStyle(0x000000, 0.4);
+    word.container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
+    word.container.fillStyle(powerColors[word.power], 1);
+    word.container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
+    word.container.lineStyle(2, 0xffffff, word.power !== 'none' ? 0.3 : 0.15);
+    word.container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
+    word.container.fillStyle(0xffffff, word.power !== 'none' ? 0.2 : 0.1);
+    word.container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
+
     if (isFocused) {
-      word.container!.fillStyle(0x000000, 0.6);
-      word.container!.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
-      word.container!.fillStyle(0x4fc3f7, 1);
-      word.container!.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-      word.container!.lineStyle(3, 0xffffff, 0.8);
-      word.container!.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-      word.container!.fillStyle(0xffffff, 0.25);
-      word.container!.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
-    } else {
-      word.container!.fillStyle(0x000000, 0.4);
-      word.container!.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
-      word.container!.fillStyle(powerColors[word.power], 1);
-      word.container!.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-      word.container!.lineStyle(2, 0xffffff, 0.3);
-      word.container!.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-      word.container!.fillStyle(0xffffff, 0.2);
-      word.container!.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
+      word.container.lineStyle(3, 0x4fc3f7, 1);
+      word.container.strokeRoundedRect(containerX - 4, containerY - 4, containerW + 8, containerH + 8, 12);
     }
   }
 
@@ -921,6 +888,7 @@ export class GameScene extends Phaser.Scene {
     if (this.gameState !== 'levelComplete') return;
 
     this.score += this.calculateLevelTotal();
+    this.levelStartScore = this.score;
     this.level++;
     this.progressPct = 0;
     this.limitPct = 0;
@@ -954,19 +922,16 @@ export class GameScene extends Phaser.Scene {
   }
 
   calculateAccuracyBonus(): number {
-    return Math.floor((this.calculateAccuracy() / 100) * this.level * 10);
+    const levelScore = this.score - this.levelStartScore;
+    return Math.floor((this.calculateAccuracy() / 100) * levelScore);
   }
 
   isErrorFree(): boolean {
     return this.wordsMissed === 0;
   }
 
-  calculateErrorFreeBonus(): number {
-    return this.isErrorFree() ? this.level * 20 : 0;
-  }
-
   calculateLevelTotal(): number {
-    return this.calculateAccuracyBonus() + this.calculateErrorFreeBonus();
+    return this.calculateAccuracyBonus();
   }
 
   showPowerFlash(color: number) {
