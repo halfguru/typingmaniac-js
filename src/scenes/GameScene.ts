@@ -5,6 +5,7 @@ import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 import { GameConfigService } from '../services/GameConfigService';
 import { EffectManager } from '../managers/EffectManager';
+import { themeService } from '../services/ThemeService';
 import {
   GAME_AREA_WIDTH,
   GAME_HEIGHT,
@@ -102,7 +103,7 @@ export class GameScene extends Phaser.Scene {
     const topGlow = this.add.graphics();
     for (let i = 0; i < 15; i++) {
       const alpha = 0.4 - i * 0.025;
-      topGlow.fillStyle(0xff6644, Math.max(0, alpha));
+      topGlow.fillStyle(themeService.getNumber('game.dangerGlow'), Math.max(0, alpha));
       topGlow.fillRect(0, zoneY - i * 3, GAME_AREA_WIDTH, 3);
     }
     topGlow.setDepth(6);
@@ -138,6 +139,7 @@ export class GameScene extends Phaser.Scene {
   createDangerLineEffects(zoneY: number) {
     const glowLine = this.add.graphics();
     glowLine.setDepth(6);
+    const dangerColor = themeService.getNumber('accent.danger');
 
     this.tweens.add({
       targets: { intensity: 0 },
@@ -154,7 +156,7 @@ export class GameScene extends Phaser.Scene {
         for (let i = 0; i < 8; i++) {
           const alpha = 0.15 * intensity * (1 - i * 0.1);
           const width = 3 + i * 2;
-          glowLine.lineStyle(width, 0xff4444, alpha);
+          glowLine.lineStyle(width, dangerColor, alpha);
           glowLine.lineBetween(0, zoneY - i * 2, GAME_AREA_WIDTH, zoneY - i * 2);
           glowLine.lineBetween(0, zoneY + i * 2, GAME_AREA_WIDTH, zoneY + i * 2);
         }
@@ -170,23 +172,21 @@ export class GameScene extends Phaser.Scene {
     const containerX = GAME_AREA_WIDTH / 2 - containerW / 2;
     const containerY = GAME_HEIGHT - 90;
 
-  
     const inputBg = this.add.graphics();
-    inputBg.fillStyle(0x050a12, 1);
+    inputBg.fillStyle(themeService.getNumber('bg.input'), 1);
     inputBg.fillRoundedRect(containerX, containerY, containerW, containerH, 12);
-    inputBg.lineStyle(2, 0x4fc3f7, 0.6);
+    inputBg.lineStyle(2, themeService.getNumber('ui.buttonBorder'), 0.6);
     inputBg.strokeRoundedRect(containerX, containerY, containerW, containerH, 12);
-    inputBg.fillStyle(0x4fc3f7, 0.1);
+    inputBg.fillStyle(themeService.getNumber('ui.buttonBorder'), 0.1);
     inputBg.fillRoundedRect(containerX + 4, containerY + 4, containerW - 8, containerH / 2 - 4, 6);
 
-  
     this.inputText = this.add.text(GAME_AREA_WIDTH / 2, containerY + containerH / 2, '', {
       fontFamily: FONT_FAMILY,
       fontSize: `${FONT_SIZE}px`,
-      color: '#4fc3f7',
+      color: themeService.getText('text.primary'),
     });
     this.inputText.setOrigin(0.5, 0.5);
-    this.inputText.setShadow(0, 0, '#4fc3f7', 10, true, true);
+    this.inputText.setShadow(0, 0, themeService.getText('text.glow'), 10, true, true);
   }
 
   handleKeyDown(event: KeyboardEvent) {
@@ -283,7 +283,7 @@ export class GameScene extends Phaser.Scene {
     const missText = this.add.text(x, y, 'MISS', {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: '#ff4444',
+      color: themeService.getText('text.danger'),
       fontStyle: 'bold',
     });
     missText.setOrigin(0, 0.5);
@@ -532,7 +532,7 @@ export class GameScene extends Phaser.Scene {
     const style: Phaser.Types.GameObjects.Text.TextStyle = {
       fontFamily: FONT_FAMILY,
       fontSize: `${FONT_SIZE}px`,
-      color: '#ffffff',
+      color: themeService.getText('game.wordText'),
     };
 
     const letters: Phaser.GameObjects.Text[] = [];
@@ -554,13 +554,13 @@ export class GameScene extends Phaser.Scene {
 
     const container = this.add.graphics();
 
-    container.fillStyle(0x000000, 0.4);
+    container.fillStyle(themeService.getNumber('effects.shadow'), 0.4);
     container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
     container.fillStyle(POWER_COLORS[power], 1);
     container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-    container.lineStyle(2, 0xffffff, power !== 'none' ? 0.3 : 0.15);
+    container.lineStyle(2, themeService.getNumber('effects.glow'), power !== 'none' ? 0.3 : 0.15);
     container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-    container.fillStyle(0xffffff, power !== 'none' ? 0.2 : 0.1);
+    container.fillStyle(themeService.getNumber('effects.glow'), power !== 'none' ? 0.2 : 0.1);
     container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
 
     container.setDepth(0);
@@ -643,7 +643,7 @@ export class GameScene extends Phaser.Scene {
     const missText = this.add.text(x, y, 'MISS', {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: '#ff4444',
+      color: themeService.getText('text.danger'),
       fontStyle: 'bold',
     });
     missText.setOrigin(0, 0.5);
@@ -670,9 +670,9 @@ export class GameScene extends Phaser.Scene {
 
       for (let i = 0; i < word.letters.length; i++) {
         if (i < matchedLen) {
-          word.letters[i].setColor('#4CAF50');
+          word.letters[i].setColor(themeService.getText('game.wordMatched'));
         } else {
-          word.letters[i].setColor('#ffffff');
+          word.letters[i].setColor(themeService.getText('game.wordText'));
         }
       }
 
@@ -693,17 +693,17 @@ export class GameScene extends Phaser.Scene {
 
     word.container.clear();
     
-    word.container.fillStyle(0x000000, 0.4);
+    word.container.fillStyle(themeService.getNumber('effects.shadow'), 0.4);
     word.container.fillRoundedRect(containerX + 3, containerY + 3, containerW, containerH, 10);
     word.container.fillStyle(POWER_COLORS[word.power], 1);
     word.container.fillRoundedRect(containerX, containerY, containerW, containerH, 10);
-    word.container.lineStyle(2, 0xffffff, word.power !== 'none' ? 0.3 : 0.15);
+    word.container.lineStyle(2, themeService.getNumber('effects.glow'), word.power !== 'none' ? 0.3 : 0.15);
     word.container.strokeRoundedRect(containerX, containerY, containerW, containerH, 10);
-    word.container.fillStyle(0xffffff, word.power !== 'none' ? 0.2 : 0.1);
+    word.container.fillStyle(themeService.getNumber('effects.glow'), word.power !== 'none' ? 0.2 : 0.1);
     word.container.fillRoundedRect(containerX + 4, containerY + 3, containerW - 8, containerH / 2 - 3, 6);
 
     if (isFocused) {
-      word.container.lineStyle(3, 0x4fc3f7, 1);
+      word.container.lineStyle(3, themeService.getNumber('ui.buttonBorder'), 1);
       word.container.strokeRoundedRect(containerX - 4, containerY - 4, containerW + 8, containerH + 8, 12);
     }
   }

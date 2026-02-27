@@ -12,6 +12,7 @@ import {
 } from '../config/constants';
 import type { PowerType, GameData } from '../types';
 import { storageService } from '../services/StorageService';
+import { themeService } from '../services/ThemeService';
 import type { GameScene } from './GameScene';
 import { ProgressBar } from '../ui/ProgressBar';
 
@@ -71,14 +72,14 @@ export class UIScene extends Phaser.Scene {
       const graphics = this.powerBoxGraphics[i];
       const label = this.powerLabels[i];
       graphics.clear();
-      graphics.fillStyle(0x0a1520, 1);
+      graphics.fillStyle(themeService.getNumber('bg.slot'), 1);
       const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
       const sidebarX = sidebarCenterX - this.powerBoxW / 2;
       const startY = 378;
       const gap = 8;
       const y = startY + i * (this.powerBoxH + gap);
       graphics.fillRoundedRect(sidebarX, y, this.powerBoxW, this.powerBoxH, 6);
-      graphics.lineStyle(1, 0x4fc3f7, 0.2);
+      graphics.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.2);
       graphics.strokeRoundedRect(sidebarX, y, this.powerBoxW, this.powerBoxH, 6);
       label.setText('');
     }
@@ -86,7 +87,7 @@ export class UIScene extends Phaser.Scene {
 
   drawSidebar() {
     const sidebarFullBg = this.add.graphics();
-    sidebarFullBg.fillStyle(0x030810, 1);
+    sidebarFullBg.fillStyle(themeService.getNumber('bg.dark'), 1);
     sidebarFullBg.fillRect(GAME_AREA_WIDTH, 0, SIDEBAR_WIDTH, GAME_HEIGHT);
 
     const centerX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
@@ -94,16 +95,16 @@ export class UIScene extends Phaser.Scene {
     const boxX = centerX - boxWidth / 2;
 
     const sidebarBg = this.add.graphics();
-    sidebarBg.fillStyle(0x050a12, 1);
+    sidebarBg.fillStyle(themeService.getNumber('bg.sidebar'), 1);
     sidebarBg.fillRoundedRect(GAME_AREA_WIDTH + 10, 20, SIDEBAR_WIDTH - 20, GAME_HEIGHT - 40, 20);
     
     for (let i = 0; i < 3; i++) {
-      sidebarBg.lineStyle(2 - i * 0.5, 0x4fc3f7, 0.3 - i * 0.1);
+      sidebarBg.lineStyle(2 - i * 0.5, themeService.getNumber('ui.panelBorder'), 0.3 - i * 0.1);
       sidebarBg.strokeRoundedRect(GAME_AREA_WIDTH + 10 + i, 20 + i, SIDEBAR_WIDTH - 20 - i * 2, GAME_HEIGHT - 40 - i * 2, 20 - i);
     }
 
     const sidebarGlow = this.add.graphics();
-    sidebarGlow.fillStyle(0x4fc3f7, 0.03);
+    sidebarGlow.fillStyle(themeService.getNumber('ui.panelBorder'), 0.03);
     sidebarGlow.fillRoundedRect(GAME_AREA_WIDTH + 15, 25, SIDEBAR_WIDTH - 30, GAME_HEIGHT - 50, 18);
     this.tweens.add({
       targets: sidebarGlow,
@@ -115,35 +116,35 @@ export class UIScene extends Phaser.Scene {
     });
 
     const levelBox = this.add.graphics();
-    levelBox.fillStyle(0x0a1520, 1);
+    levelBox.fillStyle(themeService.getNumber('bg.slot'), 1);
     levelBox.fillRoundedRect(boxX, 50, boxWidth, 100, 12);
-    levelBox.lineStyle(2, 0x4fc3f7, 0.6);
+    levelBox.lineStyle(2, themeService.getNumber('ui.panelBorder'), 0.6);
     levelBox.strokeRoundedRect(boxX, 50, boxWidth, 100, 12);
-    levelBox.fillStyle(0x4fc3f7, 0.08);
+    levelBox.fillStyle(themeService.getNumber('ui.panelBorder'), 0.08);
     levelBox.fillRoundedRect(boxX + 4, 54, boxWidth - 8, 45, 8);
 
     const levelLabel = this.add.text(centerX, 75, 'LEVEL', {
       fontFamily: FONT_FAMILY,
       fontSize: '24px',
-      color: '#7ab8b8',
+      color: themeService.getText('text.secondary'),
     });
     levelLabel.setOrigin(0.5, 0.5);
 
     this.levelText = this.add.text(centerX, 120, '1', {
       fontFamily: FONT_FAMILY,
       fontSize: '48px',
-      color: '#4fc3f7',
+      color: themeService.getText('text.primary'),
       fontStyle: 'bold',
     });
     this.levelText.setOrigin(0.5, 0.5);
-    this.levelText.setShadow(0, 0, '#4fc3f7', 8, true, true);
+    this.levelText.setShadow(0, 0, themeService.getText('text.glow'), 8, true, true);
 
     const scoreBox = this.add.graphics();
-    scoreBox.fillStyle(0x0a1520, 1);
+    scoreBox.fillStyle(themeService.getNumber('bg.slot'), 1);
     scoreBox.fillRoundedRect(boxX, 180, boxWidth, 130, 12);
-    scoreBox.lineStyle(2, 0xff6b35, 0.6);
+    scoreBox.lineStyle(2, themeService.getNumber('accent.warning'), 0.6);
     scoreBox.strokeRoundedRect(boxX, 180, boxWidth, 130, 12);
-    scoreBox.fillStyle(0xff6b35, 0.08);
+    scoreBox.fillStyle(themeService.getNumber('accent.warning'), 0.08);
     scoreBox.fillRoundedRect(boxX + 4, 184, boxWidth - 8, 55, 8);
 
     const scoreLabel = this.add.text(centerX, 205, 'SCORE', {
@@ -156,7 +157,7 @@ export class UIScene extends Phaser.Scene {
     this.scoreText = this.add.text(centerX, 260, '0', {
       fontFamily: FONT_FAMILY,
       fontSize: '42px',
-      color: '#ff8c42',
+      color: themeService.getText('text.warning'),
       fontStyle: 'bold',
     });
     this.scoreText.setOrigin(0.5, 0.5);
@@ -165,7 +166,7 @@ export class UIScene extends Phaser.Scene {
     const specialLabel = this.add.text(centerX, 340, 'SPECIAL', {
       fontFamily: FONT_FAMILY,
       fontSize: '24px',
-      color: '#7ab8b8',
+      color: themeService.getText('text.secondary'),
     });
     specialLabel.setOrigin(0.5, 0.5);
   }
@@ -179,18 +180,18 @@ export class UIScene extends Phaser.Scene {
     const boxH = this.powerBoxH;
 
     const containerBg = this.add.graphics();
-    containerBg.fillStyle(0x050a12, 1);
+    containerBg.fillStyle(themeService.getNumber('bg.sidebar'), 1);
     containerBg.fillRoundedRect(sidebarX - 8, startY - 8, boxW + 16, (boxH + gap) * MAX_POWER_STACK + 8, 12);
-    containerBg.lineStyle(1, 0x4fc3f7, 0.3);
+    containerBg.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.3);
     containerBg.strokeRoundedRect(sidebarX - 8, startY - 8, boxW + 16, (boxH + gap) * MAX_POWER_STACK + 8, 12);
 
     for (let i = 0; i < MAX_POWER_STACK; i++) {
       const y = startY + i * (this.powerBoxH + gap);
 
       const slotBg = this.add.graphics();
-      slotBg.fillStyle(0x0a1520, 1);
+      slotBg.fillStyle(themeService.getNumber('bg.slot'), 1);
       slotBg.fillRoundedRect(sidebarX, y, this.powerBoxW, this.powerBoxH, 6);
-      slotBg.lineStyle(1, 0x4fc3f7, 0.2);
+      slotBg.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.2);
       slotBg.strokeRoundedRect(sidebarX, y, this.powerBoxW, this.powerBoxH, 6);
 
       this.powerBoxGraphics.push(slotBg);
@@ -201,7 +202,7 @@ export class UIScene extends Phaser.Scene {
       const label = this.add.text(0, 0, '', {
         fontFamily: FONT_FAMILY,
         fontSize: '20px',
-        color: '#ffffff',
+        color: themeService.getText('game.wordText'),
         fontStyle: 'bold',
       });
       label.setOrigin(0.5, 0.5);
@@ -354,7 +355,7 @@ export class UIScene extends Phaser.Scene {
         const power = data.powerStack[i];
         const color = POWER_COLORS[power];
 
-        graphics.fillStyle(0x050a12, 0.8);
+        graphics.fillStyle(themeService.getNumber('bg.sidebar'), 0.8);
         graphics.fillRoundedRect(sidebarX + 2, y + 2, boxW, boxH, 6);
 
         graphics.fillStyle(color, 1);
@@ -363,17 +364,17 @@ export class UIScene extends Phaser.Scene {
         graphics.lineStyle(2, color, 0.8);
         graphics.strokeRoundedRect(sidebarX, y, boxW, boxH, 6);
 
-        graphics.fillStyle(0xffffff, 0.2);
+        graphics.fillStyle(themeService.getNumber('effects.glow'), 0.2);
         graphics.fillRoundedRect(sidebarX + 4, y + 2, boxW - 8, boxH / 2 - 2, 4);
 
         label.setText(`${POWER_SYMBOLS[power]} ${POWER_NAMES[power]}`);
-        label.setColor('#ffffff');
+        label.setColor(themeService.getText('game.wordText'));
         const shadowColor = '#' + color.toString(16).padStart(6, '0');
         label.setShadow(0, 0, shadowColor, 6, true, true);
       } else {
-        graphics.fillStyle(0x0a1520, 1);
+        graphics.fillStyle(themeService.getNumber('bg.slot'), 1);
         graphics.fillRoundedRect(sidebarX, y, boxW, boxH, 6);
-        graphics.lineStyle(1, 0x4fc3f7, 0.2);
+        graphics.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.2);
         graphics.strokeRoundedRect(sidebarX, y, boxW, boxH, 6);
         label.setText('');
         label.setShadow(0, 0, '#000000', 0, false, false);
@@ -432,7 +433,7 @@ export class UIScene extends Phaser.Scene {
     const gameOverText = this.add.text(GAME_WIDTH / 2, panelY + 165, 'GAME OVER', {
       fontFamily: FONT_FAMILY,
       fontSize: '56px',
-      color: '#ff4444',
+      color: themeService.getText('text.danger'),
       fontStyle: 'bold',
     });
     gameOverText.setOrigin(0.5, 0.5);
@@ -443,7 +444,7 @@ export class UIScene extends Phaser.Scene {
     const scoreLabel = this.add.text(GAME_WIDTH / 2, panelY + 210, 'SCORE', {
       fontFamily: FONT_FAMILY,
       fontSize: '20px',
-      color: '#7ab8b8',
+      color: themeService.getText('text.secondary'),
     });
     scoreLabel.setOrigin(0.5, 0.5);
     scoreLabel.setAlpha(0);
@@ -452,7 +453,7 @@ export class UIScene extends Phaser.Scene {
     const scoreValue = this.add.text(GAME_WIDTH / 2, panelY + 250, '0', {
       fontFamily: FONT_FAMILY,
       fontSize: '48px',
-      color: '#ff8c42',
+      color: themeService.getText('text.warning'),
       fontStyle: 'bold',
     });
     scoreValue.setOrigin(0.5, 0.5);
@@ -462,7 +463,7 @@ export class UIScene extends Phaser.Scene {
     const highScoreLabel = this.add.text(GAME_WIDTH / 2, panelY + 320, 'HIGH SCORE', {
       fontFamily: FONT_FAMILY,
       fontSize: '20px',
-      color: '#7ab8b8',
+      color: themeService.getText('text.secondary'),
     });
     highScoreLabel.setOrigin(0.5, 0.5);
     highScoreLabel.setAlpha(0);
@@ -471,7 +472,7 @@ export class UIScene extends Phaser.Scene {
     const highScoreValue = this.add.text(GAME_WIDTH / 2, panelY + 360, this.formatNumber(highScore), {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: isNewHighScore ? '#4fc3f7' : '#5a8a8a',
+      color: isNewHighScore ? themeService.getText('text.primary') : themeService.getText('text.muted'),
       fontStyle: 'bold',
     });
     highScoreValue.setOrigin(0.5, 0.5);
@@ -493,7 +494,7 @@ export class UIScene extends Phaser.Scene {
       newRecordText = this.add.text(GAME_WIDTH / 2, panelY + 400, `🏆 #${leaderboardPosition + 1} ON LEADERBOARD!`, {
         fontFamily: FONT_FAMILY,
         fontSize: '22px',
-        color: '#4fc3f7',
+        color: themeService.getText('text.primary'),
         fontStyle: 'bold',
       });
       newRecordText.setOrigin(0.5, 0.5);
@@ -504,7 +505,7 @@ export class UIScene extends Phaser.Scene {
     const restartText = this.add.text(GAME_WIDTH / 2, panelY + (newRecordText ? 445 : 420), 'Press SPACE to restart', {
       fontFamily: FONT_FAMILY,
       fontSize: '24px',
-      color: '#4fc3f7',
+      color: themeService.getText('text.primary'),
     });
     restartText.setOrigin(0.5, 0.5);
     restartText.setAlpha(0);
@@ -650,16 +651,16 @@ export class UIScene extends Phaser.Scene {
     const scrollH = 520;
 
     const scrollOuter = this.add.graphics();
-    scrollOuter.fillStyle(0x050a12, 1);
+    scrollOuter.fillStyle(themeService.getNumber('bg.sidebar'), 1);
     scrollOuter.fillRoundedRect(scrollX - scrollW / 2, scrollY - scrollH / 2, scrollW, scrollH, 20);
     for (let i = 0; i < 3; i++) {
-      scrollOuter.lineStyle(2 - i * 0.5, 0x4fc3f7, 0.5 - i * 0.1);
+      scrollOuter.lineStyle(2 - i * 0.5, themeService.getNumber('ui.panelBorder'), 0.5 - i * 0.1);
       scrollOuter.strokeRoundedRect(scrollX - scrollW / 2 + i, scrollY - scrollH / 2 + i, scrollW - i * 2, scrollH - i * 2, 20 - i);
     }
     this.levelCompleteOverlay.add(scrollOuter);
 
     const scrollGlow = this.add.graphics();
-    scrollGlow.fillStyle(0x4fc3f7, 0.05);
+    scrollGlow.fillStyle(themeService.getNumber('ui.panelBorder'), 0.05);
     scrollGlow.fillRoundedRect(scrollX - scrollW / 2 + 10, scrollY - scrollH / 2 + 10, scrollW - 20, scrollH - 20, 15);
     this.levelCompleteOverlay.add(scrollGlow);
 
@@ -674,15 +675,15 @@ export class UIScene extends Phaser.Scene {
     const titleText = this.add.text(scrollX, scrollY - 210, 'LEVEL COMPLETE!', {
       fontFamily: FONT_FAMILY,
       fontSize: '42px',
-      color: '#4fc3f7',
+      color: themeService.getText('text.primary'),
       fontStyle: 'bold',
     });
     titleText.setOrigin(0.5, 0.5);
-    titleText.setShadow(0, 0, '#4fc3f7', 12, true, true);
+    titleText.setShadow(0, 0, themeService.getText('text.glow'), 12, true, true);
     this.levelCompleteOverlay.add(titleText);
 
     const divider = this.add.graphics();
-    divider.lineStyle(2, 0x4fc3f7, 0.3);
+    divider.lineStyle(2, themeService.getNumber('ui.divider'), 0.3);
     divider.lineBetween(scrollX - 180, scrollY - 165, scrollX + 180, scrollY - 165);
     this.levelCompleteOverlay.add(divider);
 
@@ -698,7 +699,7 @@ export class UIScene extends Phaser.Scene {
       const label = this.add.text(scrollX - 80, scrollY + stat.y, stat.label, {
         fontFamily: FONT_FAMILY,
         fontSize: '24px',
-        color: '#7ab8b8',
+        color: themeService.getText('text.secondary'),
       });
       label.setOrigin(0, 0.5);
       label.setAlpha(0);
@@ -708,7 +709,7 @@ export class UIScene extends Phaser.Scene {
       const value = this.add.text(scrollX + 120, scrollY + stat.y, isSpecial ? stat.suffix : '0' + stat.suffix, {
         fontFamily: FONT_FAMILY,
         fontSize: '24px',
-        color: '#ffffff',
+        color: themeService.getText('game.wordText'),
         fontStyle: 'bold',
       });
       value.setOrigin(1, 0.5);
@@ -743,14 +744,14 @@ export class UIScene extends Phaser.Scene {
     }
 
     const divider2 = this.add.graphics();
-    divider2.lineStyle(2, 0x4fc3f7, 0.3);
+    divider2.lineStyle(2, themeService.getNumber('ui.divider'), 0.3);
     divider2.lineBetween(scrollX - 180, scrollY + 120, scrollX + 180, scrollY + 120);
     this.levelCompleteOverlay.add(divider2);
 
     const totalLabel = this.add.text(scrollX - 180, scrollY + 170, 'TOTAL SCORE', {
       fontFamily: FONT_FAMILY,
       fontSize: '28px',
-      color: '#7ab8b8',
+      color: themeService.getText('text.secondary'),
       fontStyle: 'bold',
     });
     totalLabel.setOrigin(0, 0.5);
@@ -759,7 +760,7 @@ export class UIScene extends Phaser.Scene {
     const totalValue = this.add.text(scrollX + 180, scrollY + 170, this.formatNumber(currentScore), {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: '#ff8c42',
+      color: themeService.getText('text.warning'),
       fontStyle: 'bold',
     });
     totalValue.setOrigin(1, 0.5);
@@ -782,7 +783,7 @@ export class UIScene extends Phaser.Scene {
     const continueText = this.add.text(scrollX, scrollY + 230, 'Press ENTER', {
       fontFamily: FONT_FAMILY,
       fontSize: '22px',
-      color: '#4fc3f7',
+      color: themeService.getText('text.primary'),
     });
     continueText.setOrigin(0.5, 0.5);
     this.levelCompleteOverlay.add(continueText);

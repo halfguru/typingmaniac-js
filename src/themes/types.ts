@@ -5,18 +5,24 @@ export interface ThemeColors {
     panel: number;
     overlay: number;
     dark: number;
+    sidebar: number;
+    input: number;
+    slot: number;
   };
   text: {
     primary: string;
     secondary: string;
     muted: string;
     glow: string;
+    danger: string;
+    warning: string;
   };
   accent: {
     primary: number;
     secondary: number;
     danger: number;
     success: number;
+    warning: number;
   };
   game: {
     wordText: string;
@@ -47,6 +53,18 @@ export interface ThemeColors {
     eyes: number;
     eyesGlow: number;
     eyesDanger: number;
+  };
+  ui: {
+    panelBg: number;
+    panelBorder: number;
+    buttonBg: number;
+    buttonHover: number;
+    buttonBorder: number;
+    divider: number;
+  };
+  grid: {
+    primary: number;
+    secondary: number;
   };
 }
 

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+import { themeService } from './ThemeService';
 
 export class BackgroundRenderer {
   static draw(scene: Phaser.Scene, width: number = GAME_WIDTH) {
@@ -42,7 +43,7 @@ export class BackgroundRenderer {
     gridGraphics.setAlpha(0.3);
     
     const horizonY = GAME_HEIGHT * 0.65;
-    const gridColor = 0x00ffff;
+    const gridColor = themeService.getNumber('grid.primary');
     
     for (let i = 0; i < 30; i++) {
       const y = horizonY + Math.pow(i / 30, 1.5) * (GAME_HEIGHT - horizonY);
@@ -68,7 +69,7 @@ export class BackgroundRenderer {
     const cityGraphics = scene.add.graphics();
     const skylineY = GAME_HEIGHT * 0.55;
     
-    cityGraphics.fillStyle(0x0a0a15, 1);
+    cityGraphics.fillStyle(themeService.getNumber('bg.dark'), 1);
     
     let x = 0;
     const seed = Date.now();
@@ -101,7 +102,7 @@ export class BackgroundRenderer {
         }
       }
       
-      cityGraphics.fillStyle(0x0a0a15, 1);
+      cityGraphics.fillStyle(themeService.getNumber('bg.dark'), 1);
       x += buildingWidth + seededRandom() * 10;
     }
     
@@ -134,12 +135,13 @@ export class BackgroundRenderer {
 
   private static createFloatingParticles(scene: Phaser.Scene, width: number) {
     const particleCount = 30;
+    const primaryColor = themeService.getNumber('grid.secondary');
     
     for (let i = 0; i < particleCount; i++) {
       const x = Math.random() * width;
       const y = Math.random() * GAME_HEIGHT * 0.6;
       const size = 1 + Math.random() * 3;
-      const color = Math.random() > 0.5 ? 0x4fc3f7 : (Math.random() > 0.5 ? 0xff6688 : 0x88ff88);
+      const color = Math.random() > 0.5 ? primaryColor : (Math.random() > 0.5 ? 0xff6688 : 0x88ff88);
       
       const particle = scene.add.circle(x, y, size, color, 0.4);
       particle.setDepth(-1);
@@ -162,7 +164,7 @@ export class BackgroundRenderer {
 
   private static createScanlines(scene: Phaser.Scene, width: number) {
     const scanlines = scene.add.graphics();
-    scanlines.lineStyle(1, 0x000000, 0.1);
+    scanlines.lineStyle(1, themeService.getNumber('effects.scanline'), 0.1);
     
     for (let y = 0; y < GAME_HEIGHT; y += 4) {
       scanlines.lineBetween(0, y, width, y);

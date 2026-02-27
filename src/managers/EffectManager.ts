@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { PowerType } from '../types';
 import { GAME_AREA_WIDTH, GAME_WIDTH, GAME_HEIGHT, COLORS, POWER_COLORS, FONT_FAMILY } from '../config/constants';
+import { themeService } from '../services/ThemeService';
 
 const INPUT_CONTAINER_W = 600;
 const INPUT_CONTAINER_H = 60;
@@ -19,7 +20,7 @@ export class EffectManager {
   }
 
   createFadeOverlay() {
-    this.fadeOverlay = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 1);
+    this.fadeOverlay = this.scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, themeService.getNumber('effects.shadow'), 1);
     this.fadeOverlay.setDepth(2000);
     this.scene.tweens.add({
       targets: this.fadeOverlay,
@@ -38,7 +39,7 @@ export class EffectManager {
 
   private createEmber(baseY: number, delay: number) {
     const baseX = Math.random() * GAME_AREA_WIDTH;
-    const ember = this.scene.add.circle(baseX, baseY, 2 + Math.random() * 3, 0xff6644, 0.8);
+    const ember = this.scene.add.circle(baseX, baseY, 2 + Math.random() * 3, themeService.getNumber('game.dangerGlow'), 0.8);
     ember.setDepth(7);
     ember.setAlpha(0);
     this.emberPool.push(ember);
@@ -48,7 +49,7 @@ export class EffectManager {
       const startX = Math.random() * GAME_AREA_WIDTH;
       const startY = baseY + Math.random() * 20;
       const size = 1 + Math.random() * 3;
-      const color = Math.random() > 0.5 ? 0xff6644 : (Math.random() > 0.5 ? 0xffaa44 : 0xff4444);
+      const color = Math.random() > 0.5 ? 0xff6644 : (Math.random() > 0.5 ? 0xffaa44 : themeService.getNumber('accent.danger'));
 
       ember.setPosition(startX, startY);
       ember.setRadius(size);
@@ -73,7 +74,7 @@ export class EffectManager {
 
   flashInputRed() {
     const flash = this.scene.add.graphics();
-    flash.fillStyle(0xff4444, 0.5);
+    flash.fillStyle(themeService.getNumber('accent.danger'), 0.5);
     flash.fillRoundedRect(INPUT_CONTAINER_X, INPUT_CONTAINER_Y, INPUT_CONTAINER_W, INPUT_CONTAINER_H, 12);
     flash.setDepth(99);
     this.scene.tweens.add({
@@ -207,7 +208,7 @@ export class EffectManager {
   }
 
   showWordCompleteEffect(x: number, y: number, power: PowerType) {
-    const ring = this.scene.add.circle(x, y, 20, 0xffffff, 0.6);
+    const ring = this.scene.add.circle(x, y, 20, themeService.getNumber('effects.glow'), 0.6);
     ring.setDepth(100);
     this.scene.tweens.add({
       targets: ring,
@@ -267,7 +268,7 @@ export class EffectManager {
         y + (Math.random() - 0.5) * 20,
         2,
         8 + Math.random() * 8,
-        0xffffff,
+        themeService.getNumber('effects.glow'),
         0.8
       );
       spark.setDepth(100);
@@ -308,7 +309,7 @@ export class EffectManager {
     const missText = this.scene.add.text(x, y, 'MISS', {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: '#ff4444',
+      color: themeService.getText('text.danger'),
       fontStyle: 'bold',
     });
     missText.setOrigin(0, 0.5);
@@ -326,7 +327,7 @@ export class EffectManager {
   }
 
   showMissedWordEffect(word: { x: number; y: number; letters: Phaser.GameObjects.Text[] }) {
-    const flash = this.scene.add.circle(word.x + 30, word.y, 60, 0xff4444, 0.8);
+    const flash = this.scene.add.circle(word.x + 30, word.y, 60, themeService.getNumber('accent.danger'), 0.8);
     this.scene.tweens.add({
       targets: flash,
       scaleX: 2,
@@ -369,7 +370,7 @@ export class EffectManager {
     const missText = this.scene.add.text(x, y, 'MISS', {
       fontFamily: FONT_FAMILY,
       fontSize: '36px',
-      color: '#ff4444',
+      color: themeService.getText('text.danger'),
       fontStyle: 'bold',
     });
     missText.setOrigin(0, 0.5);
