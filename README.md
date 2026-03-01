@@ -8,7 +8,9 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Phaser](https://img.shields.io/badge/Phaser-3.70-3178C6?style=flat)](https://phaser.io/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC%204.0-green.svg)](LICENSE)
+
+<img src="docs/screenshot.png" alt="Typing Maniac Screenshot" width="800">
 
 </div>
 
@@ -35,6 +37,14 @@ The game features multiple visual themes:
 - **Cyberpunk** (default): Neon cyberpunk aesthetic with grid floor and city skyline
 - **Alchemist**: Mystical wizard's study with animated wizard character, magical effects, and alchemical atmosphere
 
+### Features
+
+- 🏆 **Global Leaderboard** - Compete with players worldwide (optional Supabase)
+- 🔐 **OAuth Authentication** - Sign in with Google, Facebook, or play as guest
+- 📊 **Error Tracking** - Production monitoring with Sentry (optional)
+- 🔊 **Dynamic Audio** - Typing sounds, power-up effects, ambient music
+- 🎨 **Multiple Themes** - Switch between visual styles
+
 ---
 
 ## 🚀 Quick Start
@@ -48,6 +58,32 @@ Open http://localhost:3000 in your browser.
 
 ---
 
+## ⚙️ Configuration
+
+Create a `.env` file in the project root (optional):
+
+```bash
+# Optional: Supabase (for global leaderboard)
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Optional: Sentry (for error tracking)
+VITE_SENTRY_DSN=your_sentry_dsn
+VITE_APP_VERSION=1.0.0
+
+# Optional: PostHog (for analytics)
+VITE_POSTHOG_KEY=your_posthog_key
+VITE_POSTHOG_HOST=https://us.i.posthog.com
+```
+
+**Without configuration:**
+- Game works fully with local leaderboard only
+- Errors are logged to console instead of Sentry
+- Analytics events are logged to console instead of PostHog
+- No authentication required
+
+---
+
 ## 🛠️ Tech Stack
 
 | Component | Technology |
@@ -55,6 +91,9 @@ Open http://localhost:3000 in your browser.
 | Language | [TypeScript](https://www.typescriptlang.org/) |
 | Game Engine | [Phaser 3](https://phaser.io/) |
 | Bundler | [Vite](https://vitejs.dev/) |
+| Auth & Database | [Supabase](https://supabase.com/) (optional) |
+| Error Tracking | [Sentry](https://sentry.io/) (optional) |
+| Analytics | [PostHog](https://posthog.com/) (optional) |
 
 ---
 
@@ -64,10 +103,10 @@ Open http://localhost:3000 in your browser.
 .
 ├── src/
 │   ├── main.ts              # Entry point, scene registration
-│   ├── scenes/              # Phaser scenes (Menu, Game, UI, Countdown)
+│   ├── scenes/              # Phaser scenes (Auth, Menu, Game, UI, Countdown, Settings)
 │   ├── config/              # Game constants, colors
 │   ├── data/                # Word lists (JSON)
-│   ├── services/            # Game services (Audio, Storage, Theme, etc.)
+│   ├── services/            # Game services (Audio, Auth, Storage, Theme, Observability)
 │   ├── themes/              # Theme definitions and styling
 │   ├── ui/                  # UI components (buttons, progress bars)
 │   ├── managers/            # Effect managers
@@ -80,9 +119,15 @@ Open http://localhost:3000 in your browser.
 
 ---
 
+## 📝 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+
+---
+
 ## 📜 License
 
-[MIT](LICENSE) © 2025 halfguru
+[CC BY-NC 4.0](LICENSE) - Free for personal and educational use. Commercial use prohibited.
 
 ---
 

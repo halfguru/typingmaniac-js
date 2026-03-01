@@ -12,6 +12,7 @@ import {
 } from '../config/constants';
 import type { PowerType, GameData } from '../types';
 import { storageService } from '../services/StorageService';
+import { authService } from '../services/AuthService';
 import { themeService } from '../services/ThemeService';
 import { audioService } from '../services/AudioService';
 import type { GameScene } from './GameScene';
@@ -408,7 +409,7 @@ export class UIScene extends Phaser.Scene {
     }
   }
 
-  showGameOver() {
+  async showGameOver() {
     if (this.gameOverOverlay) return;
 
     const gameScene = this.scene.get('GameScene') as GameScene;
@@ -416,19 +417,25 @@ export class UIScene extends Phaser.Scene {
     const finalLevel = gameScene.level;
     const isNewHighScore = storageService.setHighScore(finalScore);
     const highScore = storageService.getHighScore();
-    const leaderboardPosition = storageService.addToLeaderboard(finalScore, finalLevel);
+
+    let globalRank: number | null = null;
+    let totalPlayers = 0;
+    
+    const user = authService.getUser();
+    if (user) {
+      const result = await authService.submitScore(finalScore, finalLevel);
+      if (result) {
+        globalRank = result.rank;
+        totalPlayers = result.total;
+      }
+    } else {
+      storageService.addToLeaderboard(finalScore, finalLevel);
+    }
 
     this.gameOverOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.85);
     this.gameOverOverlay.add(bg);
-    
-    this.tweens.add({
-      targets: bg,
-      alpha: 0.85,
-      duration: 300,
-      ease: 'Quad.easeOut',
-    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -576,8 +583,8 @@ export class UIScene extends Phaser.Scene {
       newRecordText.setOrigin(0.5, 0.5);
       newRecordText.setAlpha(0);
       scrollContainer.add(newRecordText);
-    } else if (leaderboardPosition >= 0 && leaderboardPosition < 5) {
-      newRecordText = this.add.text(0, 155, `★ #${leaderboardPosition + 1} LEADERBOARD ★`, {
+    } else if (globalRank !== null && globalRank <= 10) {
+      newRecordText = this.add.text(0, 155, `★ GLOBAL RANK #${globalRank} / ${totalPlayers} ★`, {
         fontFamily: FONT_FAMILY,
         fontSize: '18px',
         color: '#c9a060',
@@ -588,14 +595,23 @@ export class UIScene extends Phaser.Scene {
       scrollContainer.add(newRecordText);
     }
 
-    const restartText = this.add.text(0, 200, 'Press SPACE to restart', {
+    const restartText = this.add.text(0, 170, 'SPACE - Restart', {
       fontFamily: FONT_FAMILY,
-      fontSize: '20px',
+      fontSize: '18px',
       color: '#a08060',
     });
     restartText.setOrigin(0.5, 0.5);
     restartText.setAlpha(0);
     scrollContainer.add(restartText);
+
+    const menuText = this.add.text(0, 200, 'ESC - Main Menu', {
+      fontFamily: FONT_FAMILY,
+      fontSize: '18px',
+      color: '#a08060',
+    });
+    menuText.setOrigin(0.5, 0.5);
+    menuText.setAlpha(0);
+    scrollContainer.add(menuText);
 
     this.gameOverOverlay.add(scrollContainer);
 
@@ -693,12 +709,12 @@ export class UIScene extends Phaser.Scene {
 
         this.time.delayedCall(1800, () => {
           this.tweens.add({
-            targets: restartText,
+            targets: [restartText, menuText],
             alpha: 1,
             duration: 200,
             onComplete: () => {
               this.tweens.add({
-                targets: restartText,
+                targets: [restartText, menuText],
                 alpha: { from: 1, to: 0.4 },
                 duration: 500,
                 yoyo: true,
@@ -724,15 +740,8 @@ export class UIScene extends Phaser.Scene {
 
     this.levelCompleteOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.75);
     this.levelCompleteOverlay.add(bg);
-    
-    this.tweens.add({
-      targets: bg,
-      alpha: 0.75,
-      duration: 300,
-      ease: 'Quad.easeOut',
-    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -910,9 +919,9 @@ export class UIScene extends Phaser.Scene {
       this.levelCompleteTweens.push(this.levelCompleteTween);
     });
 
-    const continueText = this.add.text(0, 240, 'Press ENTER to continue', {
+    const continueText = this.add.text(0, 250, 'ENTER - Continue', {
       fontFamily: FONT_FAMILY,
-      fontSize: '22px',
+      fontSize: '20px',
       color: '#ffd700',
     });
     continueText.setOrigin(0.5, 0.5);
@@ -952,23 +961,43 @@ export class UIScene extends Phaser.Scene {
   createMuteButton() {
     const settings = audioService.getSettings();
     
-    const muteIcon = this.add.text(30, 30, settings.muted ? '🔇' : '🔊', {
-      fontSize: '28px',
+    const buttonX = 35;
+    const buttonY = 35;
+    const buttonSize = 44;
+
+    const buttonBg = this.add.graphics();
+    const drawBg = (isMuted: boolean, hover: boolean) => {
+      buttonBg.clear();
+      buttonBg.fillStyle(themeService.getNumber('bg.sidebar'), hover ? 0.95 : 0.85);
+      buttonBg.fillCircle(buttonX, buttonY, buttonSize / 2);
+      buttonBg.lineStyle(2, isMuted ? themeService.getNumber('accent.danger') : themeService.getNumber('ui.panelBorder'), isMuted ? 0.9 : (hover ? 0.8 : 0.4));
+      buttonBg.strokeCircle(buttonX, buttonY, buttonSize / 2);
+    };
+    drawBg(settings.muted, false);
+
+    const icon = this.add.text(buttonX, buttonY, settings.muted ? '🔇' : '🔊', {
+      fontSize: '22px',
     });
-    muteIcon.setOrigin(0.5, 0.5);
-    muteIcon.setInteractive({ useHandCursor: true });
-    
-    muteIcon.on('pointerdown', () => {
+    icon.setOrigin(0.5, 0.5);
+
+    const hitArea = this.add.circle(buttonX, buttonY, buttonSize / 2, 0x000000, 0);
+    hitArea.setInteractive({ useHandCursor: true });
+
+    hitArea.on('pointerover', () => {
+      drawBg(settings.muted, true);
+      icon.setScale(1.1);
+    });
+
+    hitArea.on('pointerout', () => {
+      const currentSettings = audioService.getSettings();
+      drawBg(currentSettings.muted, false);
+      icon.setScale(1);
+    });
+
+    hitArea.on('pointerdown', () => {
       const muted = audioService.toggleMute();
-      muteIcon.setText(muted ? '🔇' : '🔊');
-    });
-    
-    muteIcon.on('pointerover', () => {
-      muteIcon.setAlpha(0.7);
-    });
-    
-    muteIcon.on('pointerout', () => {
-      muteIcon.setAlpha(1);
+      icon.setText(muted ? '🔇' : '🔊');
+      drawBg(muted, true);
     });
   }
 
