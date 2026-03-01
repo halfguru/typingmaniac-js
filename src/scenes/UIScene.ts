@@ -434,15 +434,8 @@ export class UIScene extends Phaser.Scene {
 
     this.gameOverOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.85);
     this.gameOverOverlay.add(bg);
-    
-    this.tweens.add({
-      targets: bg,
-      alpha: 0.85,
-      duration: 300,
-      ease: 'Quad.easeOut',
-    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -602,14 +595,23 @@ export class UIScene extends Phaser.Scene {
       scrollContainer.add(newRecordText);
     }
 
-    const restartText = this.add.text(0, 200, 'Press SPACE to restart', {
+    const restartText = this.add.text(0, 170, 'SPACE - Restart', {
       fontFamily: FONT_FAMILY,
-      fontSize: '20px',
+      fontSize: '18px',
       color: '#a08060',
     });
     restartText.setOrigin(0.5, 0.5);
     restartText.setAlpha(0);
     scrollContainer.add(restartText);
+
+    const menuText = this.add.text(0, 200, 'ESC - Main Menu', {
+      fontFamily: FONT_FAMILY,
+      fontSize: '18px',
+      color: '#a08060',
+    });
+    menuText.setOrigin(0.5, 0.5);
+    menuText.setAlpha(0);
+    scrollContainer.add(menuText);
 
     this.gameOverOverlay.add(scrollContainer);
 
@@ -707,12 +709,12 @@ export class UIScene extends Phaser.Scene {
 
         this.time.delayedCall(1800, () => {
           this.tweens.add({
-            targets: restartText,
+            targets: [restartText, menuText],
             alpha: 1,
             duration: 200,
             onComplete: () => {
               this.tweens.add({
-                targets: restartText,
+                targets: [restartText, menuText],
                 alpha: { from: 1, to: 0.4 },
                 duration: 500,
                 yoyo: true,
@@ -738,15 +740,8 @@ export class UIScene extends Phaser.Scene {
 
     this.levelCompleteOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.75);
     this.levelCompleteOverlay.add(bg);
-    
-    this.tweens.add({
-      targets: bg,
-      alpha: 0.75,
-      duration: 300,
-      ease: 'Quad.easeOut',
-    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -924,9 +919,9 @@ export class UIScene extends Phaser.Scene {
       this.levelCompleteTweens.push(this.levelCompleteTween);
     });
 
-    const continueText = this.add.text(0, 240, 'Press ENTER to continue', {
+    const continueText = this.add.text(0, 250, 'ENTER - Continue', {
       fontFamily: FONT_FAMILY,
-      fontSize: '22px',
+      fontSize: '20px',
       color: '#ffd700',
     });
     continueText.setOrigin(0.5, 0.5);

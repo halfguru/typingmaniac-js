@@ -6,6 +6,9 @@ import { CountdownScene } from './scenes/CountdownScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { SettingsScene } from './scenes/SettingsScene';
+import { initObservability } from './services/ObservabilityService';
+
+initObservability();
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,

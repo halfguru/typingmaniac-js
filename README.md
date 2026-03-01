@@ -35,6 +35,14 @@ The game features multiple visual themes:
 - **Cyberpunk** (default): Neon cyberpunk aesthetic with grid floor and city skyline
 - **Alchemist**: Mystical wizard's study with animated wizard character, magical effects, and alchemical atmosphere
 
+### Features
+
+- 🏆 **Global Leaderboard** - Compete with players worldwide (optional Supabase)
+- 🔐 **OAuth Authentication** - Sign in with Google, Facebook, or play as guest
+- 📊 **Error Tracking** - Production monitoring with Sentry (optional)
+- 🔊 **Dynamic Audio** - Typing sounds, power-up effects, ambient music
+- 🎨 **Multiple Themes** - Switch between visual styles
+
 ---
 
 ## 🚀 Quick Start
@@ -48,6 +56,27 @@ Open http://localhost:3000 in your browser.
 
 ---
 
+## ⚙️ Configuration
+
+Create a `.env` file in the project root (optional):
+
+```bash
+# Optional: Supabase (for global leaderboard)
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Optional: Sentry (for error tracking)
+VITE_SENTRY_DSN=your_sentry_dsn
+VITE_APP_VERSION=1.0.0
+```
+
+**Without configuration:**
+- Game works fully with local leaderboard only
+- Errors are logged to console instead of Sentry
+- No authentication required
+
+---
+
 ## 🛠️ Tech Stack
 
 | Component | Technology |
@@ -55,6 +84,8 @@ Open http://localhost:3000 in your browser.
 | Language | [TypeScript](https://www.typescriptlang.org/) |
 | Game Engine | [Phaser 3](https://phaser.io/) |
 | Bundler | [Vite](https://vitejs.dev/) |
+| Auth & Database | [Supabase](https://supabase.com/) (optional) |
+| Error Tracking | [Sentry](https://sentry.io/) (optional) |
 
 ---
 
@@ -64,10 +95,10 @@ Open http://localhost:3000 in your browser.
 .
 ├── src/
 │   ├── main.ts              # Entry point, scene registration
-│   ├── scenes/              # Phaser scenes (Menu, Game, UI, Countdown)
+│   ├── scenes/              # Phaser scenes (Auth, Menu, Game, UI, Countdown, Settings)
 │   ├── config/              # Game constants, colors
 │   ├── data/                # Word lists (JSON)
-│   ├── services/            # Game services (Audio, Storage, Theme, etc.)
+│   ├── services/            # Game services (Audio, Auth, Storage, Theme, Observability)
 │   ├── themes/              # Theme definitions and styling
 │   ├── ui/                  # UI components (buttons, progress bars)
 │   ├── managers/            # Effect managers

@@ -202,6 +202,8 @@ export class GameScene extends Phaser.Scene {
     if (this.gameState === 'gameOver') {
       if (event.code === 'Space') {
         this.resetGame();
+      } else if (event.code === 'Escape') {
+        this.goToMenu();
       }
       return;
     }
@@ -798,5 +800,10 @@ export class GameScene extends Phaser.Scene {
 
   calculateLevelTotal(): number {
     return this.calculateAccuracyBonus();
+  }
+
+  goToMenu() {
+    this.scene.stop('UIScene');
+    this.scene.start('MenuScene');
   }
 }

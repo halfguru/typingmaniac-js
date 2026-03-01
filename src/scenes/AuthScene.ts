@@ -14,6 +14,11 @@ export class AuthScene extends Phaser.Scene {
   }
 
   create() {
+    if (!authService.isConfigured()) {
+      this.scene.start('MenuScene');
+      return;
+    }
+
     this.loading = false;
     this.authHandled = false;
     this.drawBackground();
@@ -78,7 +83,7 @@ export class AuthScene extends Phaser.Scene {
     });
     subtitle.setOrigin(0.5, 0.5);
 
-    this.createOAuthButton(centerX, panelY + 85, 'Continue with Google', 0xdb4437, async () => {
+    this.createOAuthButton(centerX, panelY + 85, 'Continue with Google', 0xdb4437, 'G', async () => {
       if (this.loading) return;
       this.loading = true;
       this.showLoading();
@@ -90,7 +95,7 @@ export class AuthScene extends Phaser.Scene {
       }
     });
 
-    this.createOAuthButton(centerX, panelY + 150, 'Continue with Facebook', 0x1877f2, async () => {
+    this.createOAuthButton(centerX, panelY + 150, 'Continue with Facebook', 0x1877f2, 'f', async () => {
       if (this.loading) return;
       this.loading = true;
       this.showLoading();
@@ -134,7 +139,7 @@ export class AuthScene extends Phaser.Scene {
     guestNote.setOrigin(0.5, 0.5);
   }
 
-  createOAuthButton(x: number, y: number, text: string, color: number, onClick: () => void) {
+  createOAuthButton(x: number, y: number, text: string, color: number, logo: string, onClick: () => void) {
     const buttonW = 320;
     const buttonH = 50;
 
@@ -142,7 +147,17 @@ export class AuthScene extends Phaser.Scene {
     button.fillStyle(color, 1);
     button.fillRoundedRect(x - buttonW / 2, y - buttonH / 2, buttonW, buttonH, 12);
 
-    const label = this.add.text(x, y, text, {
+    this.add.circle(x - buttonW / 2 + 30, y, 16, 0xffffff, 1);
+    
+    const logoText = this.add.text(x - buttonW / 2 + 30, y, logo, {
+      fontFamily: FONT_FAMILY,
+      fontSize: '18px',
+      color: '#' + color.toString(16).padStart(6, '0'),
+      fontStyle: 'bold',
+    });
+    logoText.setOrigin(0.5, 0.5);
+
+    const label = this.add.text(x + 10, y, text, {
       fontFamily: FONT_FAMILY,
       fontSize: '20px',
       color: '#ffffff',

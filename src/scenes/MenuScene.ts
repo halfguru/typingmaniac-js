@@ -4,12 +4,14 @@ import { authService, GlobalLeaderboardEntry } from '../services/AuthService';
 import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 import { themeService } from '../services/ThemeService';
+import { storageService, LeaderboardEntry } from '../services/StorageService';
 
 export class MenuScene extends Phaser.Scene {
   private tutorialOverlay?: Phaser.GameObjects.Container;
   private leaderboardOverlay?: Phaser.GameObjects.Container;
   private fadeOverlay?: Phaser.GameObjects.Rectangle;
   private leaderboardData: GlobalLeaderboardEntry[] = [];
+  private localLeaderboardData: LeaderboardEntry[] = [];
 
   constructor() {
     super({ key: 'MenuScene' });
@@ -97,33 +99,32 @@ export class MenuScene extends Phaser.Scene {
       });
     });
 
-    const secondaryButtonW = 200;
-    const secondaryButtonH = 55;
-    const row1Y = centerY + 130;
-    const row2Y = centerY + 195;
-    const col1X = centerX - secondaryButtonW / 2 - 15;
-    const col2X = centerX + secondaryButtonW / 2 + 15;
+    const secondaryButtonW = 240;
+    const secondaryButtonH = 50;
+    const buttonSpacing = 15;
+    const columnX = centerX;
+    const startY = centerY + 120;
 
-    this.createSecondaryButton(col1X, row1Y, secondaryButtonW, secondaryButtonH, '📖 TUTORIAL', () => {
+    this.createSecondaryButton(columnX, startY, secondaryButtonW, secondaryButtonH, '📖 TUTORIAL', () => {
       audioService.playButtonClick();
       this.showTutorial();
     });
 
-    this.createSecondaryButton(col2X, row1Y, secondaryButtonW, secondaryButtonH, '🏆 SCORES', () => {
+    this.createSecondaryButton(columnX, startY + secondaryButtonH + buttonSpacing, secondaryButtonW, secondaryButtonH, '🏆 SCORES', () => {
       audioService.playButtonClick();
       this.showLeaderboard();
     });
 
-    this.createSecondaryButton(col1X, row2Y, secondaryButtonW, secondaryButtonH, '⚙️ SETTINGS', () => {
+    this.createSecondaryButton(columnX, startY + (secondaryButtonH + buttonSpacing) * 2, secondaryButtonW, secondaryButtonH, '⚙️ SETTINGS', () => {
       audioService.playButtonClick();
       this.scene.pause();
       this.scene.launch('SettingsScene');
     });
 
     if (user) {
-      const logoutText = this.add.text(col2X, row2Y, 'Sign Out', {
+      const logoutText = this.add.text(centerX, startY + (secondaryButtonH + buttonSpacing) * 3 + 20, 'Sign Out', {
         fontFamily: FONT_FAMILY,
-        fontSize: '18px',
+        fontSize: '16px',
         color: themeService.getText('text.secondary'),
       });
       logoutText.setOrigin(0.5, 0.5);
@@ -506,7 +507,13 @@ export class MenuScene extends Phaser.Scene {
   async showLeaderboard() {
     if (this.leaderboardOverlay) return;
 
-    this.leaderboardData = await authService.getLeaderboard(20);
+    const isGlobal = authService.isConfigured();
+    
+    if (isGlobal) {
+      this.leaderboardData = await authService.getLeaderboard(20);
+    } else {
+      this.localLeaderboardData = storageService.getLeaderboard();
+    }
 
     this.leaderboardOverlay = this.add.container(0, 0);
     this.leaderboardOverlay.setDepth(500);
@@ -528,7 +535,8 @@ export class MenuScene extends Phaser.Scene {
     }
     this.leaderboardOverlay.add(panel);
 
-    const title = this.add.text(GAME_WIDTH / 2, panelY + 35, '🏆 GLOBAL LEADERBOARD 🏆', {
+    const titleText = isGlobal ? '🏆 GLOBAL LEADERBOARD 🏆' : '🏆 LOCAL LEADERBOARD 🏆';
+    const title = this.add.text(GAME_WIDTH / 2, panelY + 35, titleText, {
       fontFamily: FONT_FAMILY,
       fontSize: '32px',
       color: '#ffd700',
@@ -584,7 +592,9 @@ export class MenuScene extends Phaser.Scene {
     divider.lineBetween(panelX + 20, headerY + 20, panelX + panelW - 20, headerY + 20);
     this.leaderboardOverlay.add(divider);
 
-    if (this.leaderboardData.length === 0) {
+    const hasData = isGlobal ? this.leaderboardData.length > 0 : this.localLeaderboardData.length > 0;
+
+    if (!hasData) {
       const noScores = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, 'No scores yet! Be the first!', {
         fontFamily: FONT_FAMILY,
         fontSize: '24px',
@@ -594,13 +604,13 @@ export class MenuScene extends Phaser.Scene {
       this.leaderboardOverlay.add(noScores);
     } else {
       const medals = ['🥇', '🥈', '🥉'];
-      const displayCount = Math.min(this.leaderboardData.length, 10);
-      const avatarSize = 32;
+      const displayCount = isGlobal 
+        ? Math.min(this.leaderboardData.length, 10)
+        : Math.min(this.localLeaderboardData.length, 5);
       const rowStartY = panelY + 130;
       const rowHeight = 42;
 
       for (let i = 0; i < displayCount; i++) {
-        const entry = this.leaderboardData[i];
         const currentY = rowStartY + i * rowHeight;
 
         if (i % 2 === 1) {
@@ -620,59 +630,101 @@ export class MenuScene extends Phaser.Scene {
         rankLabel.setOrigin(0.5, 0.5);
         this.leaderboardOverlay.add(rankLabel);
 
-        const avatarX = panelX + 90;
-        const avatarBg = this.add.circle(avatarX, currentY, avatarSize / 2 + 2, themeService.getNumber('ui.panelBorder'), 0.5);
-        this.leaderboardOverlay.add(avatarBg);
+        if (isGlobal) {
+          const entry = this.leaderboardData[i];
+          const avatarX = panelX + 90;
+          const avatarSize = 32;
+          const avatarBg = this.add.circle(avatarX, currentY, avatarSize / 2 + 2, themeService.getNumber('ui.panelBorder'), 0.5);
+          this.leaderboardOverlay.add(avatarBg);
 
-        if (entry.avatar_url && this.textures.exists(`avatar_${entry.user_id}`)) {
-          const avatar = this.add.image(avatarX, currentY, `avatar_${entry.user_id}`);
-          avatar.setDisplaySize(avatarSize, avatarSize);
-          
-          const maskGraphics = this.make.graphics({});
-          maskGraphics.fillStyle(0xffffff);
-          maskGraphics.fillCircle(avatarX, currentY, avatarSize / 2);
-          const mask = maskGraphics.createGeometryMask();
-          avatar.setMask(mask);
-          
-          this.leaderboardOverlay.add(avatar);
-        } else {
-          const initial = entry.username.charAt(0).toUpperCase();
-          const initialText = this.add.text(avatarX, currentY, initial, {
+          if (entry.avatar_url && this.textures.exists(`avatar_${entry.user_id}`)) {
+            const avatar = this.add.image(avatarX, currentY, `avatar_${entry.user_id}`);
+            avatar.setDisplaySize(avatarSize, avatarSize);
+            
+            const maskGraphics = this.make.graphics({});
+            maskGraphics.fillStyle(0xffffff);
+            maskGraphics.fillCircle(avatarX, currentY, avatarSize / 2);
+            const mask = maskGraphics.createGeometryMask();
+            avatar.setMask(mask);
+            
+            this.leaderboardOverlay.add(avatar);
+          } else {
+            const initial = entry.username.charAt(0).toUpperCase();
+            const initialText = this.add.text(avatarX, currentY, initial, {
+              fontFamily: FONT_FAMILY,
+              fontSize: '16px',
+              color: themeService.getText('text.primary'),
+              fontStyle: 'bold',
+            });
+            initialText.setOrigin(0.5, 0.5);
+            this.leaderboardOverlay.add(initialText);
+          }
+
+          const username = entry.username.length > 14 ? entry.username.substring(0, 14) + '…' : entry.username;
+          const nameLabel = this.add.text(panelX + 115, currentY, username, {
             fontFamily: FONT_FAMILY,
-            fontSize: '16px',
-            color: themeService.getText('text.primary'),
+            fontSize: '20px',
+            color: i < 3 ? themeService.getText('text.primary') : themeService.getText('game.wordText'),
+            fontStyle: i < 3 ? 'bold' : 'normal',
+          });
+          nameLabel.setOrigin(0, 0.5);
+          this.leaderboardOverlay.add(nameLabel);
+
+          const scoreLabel = this.add.text(panelX + panelW - 140, currentY, this.formatNumber(entry.score), {
+            fontFamily: FONT_FAMILY,
+            fontSize: '20px',
+            color: i === 0 ? '#ffd700' : themeService.getText('text.primary'),
             fontStyle: 'bold',
+          });
+          scoreLabel.setOrigin(0.5, 0.5);
+          this.leaderboardOverlay.add(scoreLabel);
+
+          const levelLabel = this.add.text(panelX + panelW - 50, currentY, `${entry.level}`, {
+            fontFamily: FONT_FAMILY,
+            fontSize: '18px',
+            color: themeService.getText('text.secondary'),
+          });
+          levelLabel.setOrigin(0.5, 0.5);
+          this.leaderboardOverlay.add(levelLabel);
+        } else {
+          const entry = this.localLeaderboardData[i];
+          
+          const avatarX = panelX + 90;
+          const avatarBg = this.add.circle(avatarX, currentY, 18, themeService.getNumber('ui.panelBorder'), 0.5);
+          this.leaderboardOverlay.add(avatarBg);
+          
+          const initialText = this.add.text(avatarX, currentY, '👤', {
+            fontSize: '16px',
           });
           initialText.setOrigin(0.5, 0.5);
           this.leaderboardOverlay.add(initialText);
+
+          const nameLabel = this.add.text(panelX + 115, currentY, 'You', {
+            fontFamily: FONT_FAMILY,
+            fontSize: '20px',
+            color: i < 3 ? themeService.getText('text.primary') : themeService.getText('game.wordText'),
+            fontStyle: i < 3 ? 'bold' : 'normal',
+          });
+          nameLabel.setOrigin(0, 0.5);
+          this.leaderboardOverlay.add(nameLabel);
+
+          const scoreLabel = this.add.text(panelX + panelW - 140, currentY, this.formatNumber(entry.score), {
+            fontFamily: FONT_FAMILY,
+            fontSize: '20px',
+            color: i === 0 ? '#ffd700' : themeService.getText('text.primary'),
+            fontStyle: 'bold',
+          });
+          scoreLabel.setOrigin(0.5, 0.5);
+          this.leaderboardOverlay.add(scoreLabel);
+
+          const levelLabel = this.add.text(panelX + panelW - 50, currentY, `${entry.level}`, {
+            fontFamily: FONT_FAMILY,
+            fontSize: '18px',
+            color: themeService.getText('text.secondary'),
+          });
+          levelLabel.setOrigin(0.5, 0.5);
+          this.leaderboardOverlay.add(levelLabel);
         }
-
-        const username = entry.username.length > 14 ? entry.username.substring(0, 14) + '…' : entry.username;
-        const nameLabel = this.add.text(panelX + 115, currentY, username, {
-          fontFamily: FONT_FAMILY,
-          fontSize: '20px',
-          color: i < 3 ? themeService.getText('text.primary') : themeService.getText('game.wordText'),
-          fontStyle: i < 3 ? 'bold' : 'normal',
-        });
-        nameLabel.setOrigin(0, 0.5);
-        this.leaderboardOverlay.add(nameLabel);
-
-        const scoreLabel = this.add.text(panelX + panelW - 140, currentY, this.formatNumber(entry.score), {
-          fontFamily: FONT_FAMILY,
-          fontSize: '20px',
-          color: i === 0 ? '#ffd700' : themeService.getText('text.primary'),
-          fontStyle: 'bold',
-        });
-        scoreLabel.setOrigin(0.5, 0.5);
-        this.leaderboardOverlay.add(scoreLabel);
-
-        const levelLabel = this.add.text(panelX + panelW - 50, currentY, `${entry.level}`, {
-          fontFamily: FONT_FAMILY,
-          fontSize: '18px',
-          color: themeService.getText('text.secondary'),
-        });
-        levelLabel.setOrigin(0.5, 0.5);
-        this.leaderboardOverlay.add(levelLabel);
       }
     }
 

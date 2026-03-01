@@ -1,13 +1,15 @@
-import { createClient, User } from '@supabase/supabase-js';
+import { createClient, User, SupabaseClient } from '@supabase/supabase-js';
+import { setUser, clearUser, addBreadcrumb, captureException } from './ObservabilityService';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
-}
+const isConfigured = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase: SupabaseClient | null = null;
+if (isConfigured) {
+  supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+}
 
 export interface GlobalLeaderboardEntry {
   id: string;
@@ -31,16 +33,26 @@ class AuthServiceImpl {
   private onAuthChangeCallback?: (user: AuthUser | null) => void;
 
   constructor() {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        this.currentUser = this.mapUser(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        this.currentUser = null;
-      }
-      if (this.onAuthChangeCallback) {
-        this.onAuthChangeCallback(this.currentUser);
-      }
-    });
+    if (supabase) {
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          this.currentUser = this.mapUser(session.user);
+          setUser(this.currentUser.id, this.currentUser.name);
+          addBreadcrumb('auth', 'User signed in', { method: session.user.app_metadata?.provider || 'unknown' });
+        } else if (event === 'SIGNED_OUT') {
+          this.currentUser = null;
+          clearUser();
+          addBreadcrumb('auth', 'User signed out');
+        }
+        if (this.onAuthChangeCallback) {
+          this.onAuthChangeCallback(this.currentUser);
+        }
+      });
+    }
+  }
+
+  isConfigured(): boolean {
+    return isConfigured;
   }
 
   private mapUser(user: User): AuthUser {
@@ -67,6 +79,8 @@ class AuthServiceImpl {
   }
 
   async initialize(): Promise<AuthUser | null> {
+    if (!supabase) return null;
+    
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       this.currentUser = this.mapUser(session.user);
@@ -81,6 +95,10 @@ class AuthServiceImpl {
   }
 
   async signInWithGoogle(): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) return { success: false, error: 'Supabase not configured' };
+    
+    addBreadcrumb('auth', 'Attempting Google sign in');
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -89,15 +107,21 @@ class AuthServiceImpl {
         },
       });
       if (error) {
+        captureException(new Error(error.message), { provider: 'google' });
         return { success: false, error: error.message };
       }
       return { success: true };
     } catch (err) {
+      captureException(err as Error, { provider: 'google' });
       return { success: false, error: String(err) };
     }
   }
 
   async signInWithFacebook(): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) return { success: false, error: 'Supabase not configured' };
+    
+    addBreadcrumb('auth', 'Attempting Facebook sign in');
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
@@ -106,15 +130,19 @@ class AuthServiceImpl {
         },
       });
       if (error) {
+        captureException(new Error(error.message), { provider: 'facebook' });
         return { success: false, error: error.message };
       }
       return { success: true };
     } catch (err) {
+      captureException(err as Error, { provider: 'facebook' });
       return { success: false, error: String(err) };
     }
   }
 
   async signInAnonymously(): Promise<{ success: boolean; error?: string }> {
+    if (!supabase) return { success: false, error: 'Supabase not configured' };
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -139,11 +167,14 @@ class AuthServiceImpl {
   }
 
   async signOut(): Promise<void> {
+    if (!supabase) return;
     await supabase.auth.signOut({ scope: 'global' });
     this.currentUser = null;
   }
 
   async submitScore(score: number, level: number): Promise<{ rank: number; total: number } | null> {
+    if (!supabase) return null;
+    
     const user = this.getUser();
     if (!user) return null;
 
@@ -157,7 +188,7 @@ class AuthServiceImpl {
       });
 
       if (error) {
-        console.error('Failed to submit score:', error);
+        captureException(new Error(error.message), { operation: 'submitScore', score, level });
         return null;
       }
 
@@ -184,12 +215,14 @@ class AuthServiceImpl {
 
       return { rank, total: count || data.length };
     } catch (err) {
-      console.error('Failed to submit score:', err);
+      captureException(err as Error, { operation: 'submitScore', score, level });
       return null;
     }
   }
 
   async getLeaderboard(limit = 20): Promise<GlobalLeaderboardEntry[]> {
+    if (!supabase) return [];
+    
     try {
       const { data, error } = await supabase
         .from('leaderboard')
@@ -198,13 +231,13 @@ class AuthServiceImpl {
         .limit(limit);
 
       if (error) {
-        console.error('Failed to fetch leaderboard:', error);
+        captureException(new Error(error.message), { operation: 'getLeaderboard' });
         return [];
       }
 
       return data || [];
     } catch (err) {
-      console.error('Failed to fetch leaderboard:', err);
+      captureException(err as Error, { operation: 'getLeaderboard' });
       return [];
     }
   }
