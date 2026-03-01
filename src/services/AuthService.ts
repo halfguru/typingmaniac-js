@@ -93,20 +93,6 @@ class AuthServiceImpl {
   async initialize(): Promise<AuthUser | null> {
     if (!supabase) return null;
 
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-
-    if (accessToken && refreshToken) {
-      const { error } = await supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-      if (!error) {
-        window.history.replaceState(null, '', window.location.pathname);
-      }
-    }
-
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       this.currentUser = this.mapUser(session.user);
