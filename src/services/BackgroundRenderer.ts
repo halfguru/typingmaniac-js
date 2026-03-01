@@ -27,8 +27,13 @@ export class BackgroundRenderer {
   private static drawAlchemistBackground(scene: Phaser.Scene, width: number) {
     this.createGrandLibrary(scene, width);
     this.createArches(scene, width);
+    this.createMagicCircle(scene, width);
     this.createFloatingRunes(scene, width);
+    this.createFloatingCrystals(scene, width);
+    this.createPotionBottles(scene, width);
     this.createMagicAura(scene, width);
+    this.createMysticalFog(scene, width);
+    this.createAmbientEnergy(scene, width);
     this.createDustMotes(scene, width);
   }
 
@@ -113,24 +118,70 @@ export class BackgroundRenderer {
     drawGrandBookshelf(0, 150, 6);
     drawGrandBookshelf(width - 150, 150, 6);
 
-    const createGlobe = (x: number, y: number) => {
-      const globe = scene.add.graphics();
-      globe.fillStyle(0x8b4513, 1);
-      globe.fillCircle(x, y + 25, 15);
-      globe.fillStyle(0x654321, 1);
-      globe.fillRect(x - 3, y - 40, 6, 50);
-      globe.fillStyle(0x4169e1, 0.8);
-      globe.fillCircle(x, y - 50, 40);
-      globe.fillStyle(0x228b22, 0.6);
-      globe.fillCircle(x - 10, y - 55, 15);
-      globe.fillCircle(x + 15, y - 45, 10);
-      globe.lineStyle(2, 0xffd700, 0.5);
-      globe.strokeCircle(x, y - 50, 42);
-      globe.setDepth(-4);
+    const createGlowingTome = (x: number, shelfIndex: number) => {
+      const shelfY = 100 + shelfIndex * 130;
+      const bookY = shelfY + 100 - 90;
+      
+      const tome = scene.add.graphics();
+      tome.fillStyle(0x4a1a4a, 0.9);
+      tome.fillRect(x, bookY, 16, 85);
+      tome.lineStyle(1, 0xffd700, 0.4);
+      tome.strokeRect(x, bookY, 16, 85);
+      tome.fillStyle(0xffd700, 0.3);
+      tome.fillRect(x + 2, bookY + 5, 12, 3);
+      tome.fillRect(x + 2, bookY + 75, 12, 3);
+      tome.setDepth(-4);
+
+      const glow = scene.add.graphics();
+      for (let i = 3; i >= 0; i--) {
+        glow.fillStyle(0xffd700, 0.03 * (4 - i));
+        glow.fillRoundedRect(x - 8 - i * 4, bookY - 8 - i * 4, 32 + i * 8, 101 + i * 8, 6);
+      }
+      glow.setDepth(-5);
+      glow.setBlendMode(Phaser.BlendModes.ADD);
+
+      scene.tweens.add({
+        targets: glow,
+        alpha: { from: 0.7, to: 0.3 },
+        duration: 2000 + Math.random() * 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      for (let i = 0; i < 3; i++) {
+        const sparkle = scene.add.circle(
+          x + 8 + (Math.random() - 0.5) * 20,
+          bookY + 20 + Math.random() * 50,
+          1,
+          0xffd700,
+          0.4
+        );
+        sparkle.setDepth(-3);
+
+        scene.tweens.add({
+          targets: sparkle,
+          alpha: 0,
+          scale: { from: 1, to: 0.5 },
+          duration: 1500 + Math.random() * 500,
+          repeat: -1,
+          delay: i * 600 + Math.random() * 400,
+          onRepeat: () => {
+            sparkle.setPosition(
+              x + 8 + (Math.random() - 0.5) * 20,
+              bookY + 20 + Math.random() * 50
+            );
+            sparkle.setAlpha(0.4);
+            sparkle.setScale(1);
+          },
+        });
+      }
     };
-    
-    createGlobe(75, 200);
-    createGlobe(width - 75, 200);
+
+    createGlowingTome(50, 1);
+    createGlowingTome(100, 3);
+    createGlowingTome(width - 130, 2);
+    createGlowingTome(width - 80, 4);
   }
 
   private static createArches(scene: Phaser.Scene, width: number) {
@@ -175,33 +226,103 @@ export class BackgroundRenderer {
     arch.setDepth(-6);
   }
 
-  private static createFloatingRunes(scene: Phaser.Scene, width: number) {
-    const runeSymbols = ['✧', '◈', '❈', '✦', '◆', '❖'];
+  private static createMagicCircle(scene: Phaser.Scene, width: number) {
+    const centerX = width / 2;
+    const centerY = GAME_HEIGHT - 250;
+    const circle = scene.add.graphics();
     
-    for (let i = 0; i < 12; i++) {
-      const x = 100 + Math.random() * (width - 200);
-      const y = 100 + Math.random() * (GAME_HEIGHT - 400);
-      const symbol = runeSymbols[Math.floor(Math.random() * runeSymbols.length)];
+    circle.lineStyle(2, 0xffd700, 0.15);
+    circle.strokeCircle(centerX, centerY, 200);
+    circle.strokeCircle(centerX, centerY, 160);
+    circle.strokeCircle(centerX, centerY, 120);
+    
+    circle.lineStyle(1, 0xffd700, 0.1);
+    circle.strokeCircle(centerX, centerY, 180);
+    circle.strokeCircle(centerX, centerY, 140);
+    
+    const hexSize = 100;
+    circle.lineStyle(1, 0xffd700, 0.12);
+    circle.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3 - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * hexSize;
+      const y = centerY + Math.sin(angle) * hexSize;
+      if (i === 0) circle.moveTo(x, y);
+      else circle.lineTo(x, y);
+    }
+    circle.closePath();
+    circle.strokePath();
+    
+    const alchemicalSymbols = ['☉', '☽', '🜁', '🜂', '🜃', '🜄'];
+    for (let i = 0; i < 6; i++) {
+      const angle = (i * Math.PI) / 3 - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * 130;
+      const y = centerY + Math.sin(angle) * 130;
+      
+      const symbol = scene.add.text(x, y, alchemicalSymbols[i], {
+        fontFamily: 'Arial',
+        fontSize: '24px',
+        color: '#ffd700',
+      });
+      symbol.setOrigin(0.5, 0.5);
+      symbol.setAlpha(0.2);
+      symbol.setDepth(-4);
+      
+      scene.tweens.add({
+        targets: symbol,
+        alpha: { from: 0.2, to: 0.35 },
+        duration: 2000 + i * 300,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+    }
+    
+    circle.fillStyle(0xffd700, 0.05);
+    circle.fillCircle(centerX, centerY, 200);
+    circle.setDepth(-5);
+    
+    scene.tweens.add({
+      targets: circle,
+      alpha: { from: 0.8, to: 0.5 },
+      scaleX: { from: 1, to: 1.02 },
+      scaleY: { from: 1, to: 1.02 },
+      duration: 3000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+  }
+
+  private static createFloatingRunes(scene: Phaser.Scene, width: number) {
+    const runeSymbols = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ', 'ᛁ', 'ᛃ', 'ᛇ', 'ᛈ', 'ᛉ', 'ᛋ'];
+    const alchemicalSymbols = ['🜛', '🜚', '🜙', '⍟', '🜍', '🜎'];
+    const allSymbols = [...runeSymbols, ...alchemicalSymbols];
+    
+    for (let i = 0; i < 18; i++) {
+      const x = 80 + Math.random() * (width - 160);
+      const y = 80 + Math.random() * (GAME_HEIGHT - 350);
+      const symbol = allSymbols[Math.floor(Math.random() * allSymbols.length)];
       
       const rune = scene.add.text(x, y, symbol, {
         fontFamily: 'Arial',
-        fontSize: `${20 + Math.random() * 30}px`,
+        fontSize: `${16 + Math.random() * 24}px`,
         color: '#ffd700',
       });
-      rune.setAlpha(0.3 + Math.random() * 0.3);
+      rune.setAlpha(0.15 + Math.random() * 0.2);
       rune.setDepth(-2);
       
       scene.tweens.add({
         targets: rune,
-        y: y - 30 - Math.random() * 40,
+        y: y - 40 - Math.random() * 60,
         alpha: { from: rune.alpha, to: 0 },
-        angle: { from: 0, to: (Math.random() - 0.5) * 30 },
-        duration: 4000 + Math.random() * 3000,
+        angle: { from: 0, to: (Math.random() - 0.5) * 20 },
+        duration: 5000 + Math.random() * 4000,
         repeat: -1,
-        delay: Math.random() * 2000,
+        delay: Math.random() * 3000,
         onRepeat: () => {
-          rune.setPosition(100 + Math.random() * (width - 200), GAME_HEIGHT - 200 + Math.random() * 100);
-          rune.setAlpha(0.3 + Math.random() * 0.3);
+          rune.setPosition(80 + Math.random() * (width - 160), GAME_HEIGHT - 150 + Math.random() * 80);
+          rune.setAlpha(0.15 + Math.random() * 0.2);
           rune.setAngle(0);
         },
       });
@@ -270,6 +391,242 @@ export class BackgroundRenderer {
         onRepeat: () => {
           mote.setPosition(Math.random() * width, GAME_HEIGHT + 20);
           mote.setAlpha(0.2);
+        },
+      });
+    }
+  }
+
+  private static createFloatingCrystals(scene: Phaser.Scene, width: number) {
+    const crystalData = [
+      { x: width * 0.15, y: 280, color: 0xffa500, size: 22 },
+      { x: width * 0.85, y: 320, color: 0xff6b35, size: 18 },
+      { x: width * 0.25, y: 500, color: 0xffd700, size: 15 },
+      { x: width * 0.75, y: 450, color: 0xcc7700, size: 20 },
+    ];
+
+    for (const data of crystalData) {
+      const crystal = scene.add.graphics();
+      
+      crystal.fillStyle(data.color, 0.5);
+      crystal.beginPath();
+      crystal.moveTo(data.x, data.y - data.size);
+      crystal.lineTo(data.x + data.size * 0.6, data.y);
+      crystal.lineTo(data.x, data.y + data.size * 0.8);
+      crystal.lineTo(data.x - data.size * 0.6, data.y);
+      crystal.closePath();
+      crystal.fillPath();
+      
+      crystal.lineStyle(1, 0xffffff, 0.2);
+      crystal.strokePath();
+      
+      crystal.fillStyle(0xffffff, 0.15);
+      crystal.beginPath();
+      crystal.moveTo(data.x, data.y - data.size);
+      crystal.lineTo(data.x + data.size * 0.3, data.y - data.size * 0.3);
+      crystal.lineTo(data.x, data.y);
+      crystal.lineTo(data.x - data.size * 0.3, data.y - data.size * 0.3);
+      crystal.closePath();
+      crystal.fillPath();
+      
+      crystal.setDepth(-3);
+
+      const glow = scene.add.graphics();
+      for (let i = 3; i >= 0; i--) {
+        glow.fillStyle(data.color, 0.03 * (4 - i));
+        glow.fillCircle(data.x, data.y, data.size + i * 8);
+      }
+      glow.setDepth(-4);
+      glow.setBlendMode(Phaser.BlendModes.ADD);
+
+      scene.tweens.add({
+        targets: crystal,
+        y: data.y - 15,
+        duration: 3000 + Math.random() * 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      scene.tweens.add({
+        targets: glow,
+        alpha: { from: 0.6, to: 0.3 },
+        scale: { from: 1, to: 1.1 },
+        duration: 2000 + Math.random() * 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      for (let i = 0; i < 3; i++) {
+        const particle = scene.add.circle(
+          data.x + (Math.random() - 0.5) * 30,
+          data.y + data.size,
+          1,
+          0xffd700,
+          0.3
+        );
+        particle.setDepth(-2);
+
+        scene.tweens.add({
+          targets: particle,
+          y: data.y + data.size + 30 + Math.random() * 20,
+          alpha: 0,
+          duration: 2000 + Math.random() * 1000,
+          repeat: -1,
+          delay: i * 700 + Math.random() * 500,
+          onRepeat: () => {
+            particle.setPosition(
+              data.x + (Math.random() - 0.5) * 30,
+              data.y + data.size
+            );
+            particle.setAlpha(0.3);
+          },
+        });
+      }
+    }
+  }
+
+  private static createPotionBottles(scene: Phaser.Scene, width: number) {
+    const potions = [
+      { x: 180, y: 350, color: 0xffa500 },
+      { x: width - 180, y: 400, color: 0xffd700 },
+      { x: 200, y: 600, color: 0xff6b35 },
+    ];
+
+    for (const potion of potions) {
+      const bottle = scene.add.graphics();
+      
+      bottle.fillStyle(0x4a3520, 0.6);
+      bottle.fillRect(potion.x - 4, potion.y - 20, 8, 6);
+      
+      bottle.fillStyle(0x654321, 0.8);
+      bottle.fillRoundedRect(potion.x - 10, potion.y - 14, 20, 28, 4);
+      
+      bottle.fillStyle(potion.color, 0.4);
+      bottle.fillRoundedRect(potion.x - 8, potion.y - 10, 16, 22, 3);
+      
+      bottle.fillStyle(0xffffff, 0.1);
+      bottle.fillRoundedRect(potion.x - 6, potion.y - 8, 4, 8, 2);
+      
+      bottle.setDepth(-3);
+
+      const glow = scene.add.graphics();
+      glow.fillStyle(potion.color, 0.08);
+      glow.fillCircle(potion.x, potion.y, 25);
+      glow.setDepth(-4);
+      glow.setBlendMode(Phaser.BlendModes.ADD);
+
+      scene.tweens.add({
+        targets: bottle,
+        y: potion.y - 8,
+        duration: 2500 + Math.random() * 1000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      scene.tweens.add({
+        targets: glow,
+        alpha: { from: 0.8, to: 0.4 },
+        duration: 1500 + Math.random() * 500,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      });
+
+      for (let i = 0; i < 2; i++) {
+        const bubble = scene.add.circle(
+          potion.x + (Math.random() - 0.5) * 10,
+          potion.y + 5,
+          1.5,
+          potion.color,
+          0.4
+        );
+        bubble.setDepth(-2);
+
+        scene.tweens.add({
+          targets: bubble,
+          y: potion.y - 15,
+          alpha: 0,
+          duration: 1500 + Math.random() * 500,
+          repeat: -1,
+          delay: i * 800 + Math.random() * 400,
+          onRepeat: () => {
+            bubble.setPosition(
+              potion.x + (Math.random() - 0.5) * 10,
+              potion.y + 5
+            );
+            bubble.setAlpha(0.4);
+          },
+        });
+      }
+    }
+  }
+
+  private static createMysticalFog(scene: Phaser.Scene, width: number) {
+    const fogY = GAME_HEIGHT - 180;
+    
+    for (let i = 0; i < 5; i++) {
+      const fog = scene.add.graphics();
+      const fogWidth = 300 + Math.random() * 200;
+      const fogX = Math.random() * width;
+      
+      for (let j = 5; j >= 0; j--) {
+        const alpha = 0.02 * (6 - j);
+        fog.fillStyle(0xffd700, alpha);
+        fog.fillEllipse(fogX, fogY + Math.random() * 40, fogWidth + j * 30, 60 + j * 15);
+      }
+      
+      fog.setDepth(-3);
+      fog.setBlendMode(Phaser.BlendModes.ADD);
+
+      scene.tweens.add({
+        targets: fog,
+        x: fog.x + (Math.random() > 0.5 ? 30 : -30),
+        alpha: { from: 0.6, to: 0.3 },
+        duration: 4000 + Math.random() * 2000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+        delay: i * 500,
+      });
+    }
+  }
+
+  private static createAmbientEnergy(scene: Phaser.Scene, width: number) {
+    const centerX = width / 2;
+    const centerY = GAME_HEIGHT - 250;
+
+    for (let i = 0; i < 20; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 50 + Math.random() * 180;
+      const x = centerX + Math.cos(angle) * distance;
+      const y = centerY + Math.sin(angle) * distance;
+      
+      const particle = scene.add.circle(x, y, 0.8 + Math.random() * 1.2, 0xffd700, 0.25);
+      particle.setDepth(-2);
+
+      const targetAngle = angle + (Math.random() > 0.5 ? 1 : -1) * 0.5;
+      const targetDistance = distance + (Math.random() - 0.5) * 50;
+      const targetX = centerX + Math.cos(targetAngle) * targetDistance;
+      const targetY = centerY + Math.sin(targetAngle) * targetDistance;
+
+      scene.tweens.add({
+        targets: particle,
+        x: targetX,
+        y: targetY - 50,
+        alpha: 0,
+        duration: 3000 + Math.random() * 2000,
+        repeat: -1,
+        delay: Math.random() * 2000,
+        onRepeat: () => {
+          const newAngle = Math.random() * Math.PI * 2;
+          const newDistance = 50 + Math.random() * 180;
+          particle.setPosition(
+            centerX + Math.cos(newAngle) * newDistance,
+            centerY + Math.sin(newAngle) * newDistance
+          );
+          particle.setAlpha(0.25);
         },
       });
     }

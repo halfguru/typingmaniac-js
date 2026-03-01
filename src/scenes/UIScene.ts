@@ -13,6 +13,7 @@ import {
 import type { PowerType, GameData } from '../types';
 import { storageService } from '../services/StorageService';
 import { themeService } from '../services/ThemeService';
+import { audioService } from '../services/AudioService';
 import type { GameScene } from './GameScene';
 import { ProgressBar } from '../ui/ProgressBar';
 
@@ -50,6 +51,7 @@ export class UIScene extends Phaser.Scene {
     this.drawSidebar();
     this.createPowerBoxes();
     this.createProgressBars();
+    this.createMuteButton();
 
     const gameScene = this.scene.get('GameScene') as GameScene;
     gameScene.events.on('gameDataUpdate', (data: GameData) => {
@@ -418,8 +420,15 @@ export class UIScene extends Phaser.Scene {
 
     this.gameOverOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.8);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
     this.gameOverOverlay.add(bg);
+    
+    this.tweens.add({
+      targets: bg,
+      alpha: 0.85,
+      duration: 300,
+      ease: 'Quad.easeOut',
+    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -599,6 +608,7 @@ export class UIScene extends Phaser.Scene {
       scaleX: 1,
       scaleY: 1,
       duration: 400,
+      delay: 150,
       ease: 'Back.easeOut',
       onComplete: () => {
         this.tweens.add({
@@ -714,8 +724,15 @@ export class UIScene extends Phaser.Scene {
 
     this.levelCompleteOverlay = this.add.container(0, 0);
 
-    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.75);
+    const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0);
     this.levelCompleteOverlay.add(bg);
+    
+    this.tweens.add({
+      targets: bg,
+      alpha: 0.75,
+      duration: 300,
+      ease: 'Quad.easeOut',
+    });
 
     const scrollX = GAME_WIDTH / 2;
     const scrollY = GAME_HEIGHT / 2;
@@ -911,12 +928,48 @@ export class UIScene extends Phaser.Scene {
     });
     this.levelCompleteTweens.push(blinkTween);
 
+    scrollContainer.setScale(0.8, 0.8);
+    scrollContainer.setAlpha(0);
+    
+    this.tweens.add({
+      targets: scrollContainer,
+      alpha: 1,
+      scaleX: 1,
+      scaleY: 1,
+      duration: 400,
+      delay: 150,
+      ease: 'Back.easeOut',
+    });
+
     this.levelCompleteOverlay.add(scrollContainer);
 
     const divider3 = this.add.graphics();
     divider3.lineStyle(1, 0x8b4513, 0.5);
     divider3.lineBetween(-160, -70, 160, -70);
     scrollContainer.add(divider3);
+  }
+
+  createMuteButton() {
+    const settings = audioService.getSettings();
+    
+    const muteIcon = this.add.text(30, 30, settings.muted ? '🔇' : '🔊', {
+      fontSize: '28px',
+    });
+    muteIcon.setOrigin(0.5, 0.5);
+    muteIcon.setInteractive({ useHandCursor: true });
+    
+    muteIcon.on('pointerdown', () => {
+      const muted = audioService.toggleMute();
+      muteIcon.setText(muted ? '🔇' : '🔊');
+    });
+    
+    muteIcon.on('pointerover', () => {
+      muteIcon.setAlpha(0.7);
+    });
+    
+    muteIcon.on('pointerout', () => {
+      muteIcon.setAlpha(1);
+    });
   }
 
   formatNumber(n: number): string {
@@ -927,9 +980,19 @@ export class UIScene extends Phaser.Scene {
 
   hideOverlays() {
     if (this.gameOverOverlay) {
-      this.tweens.killTweensOf(this.gameOverOverlay);
-      this.gameOverOverlay.destroy();
-      this.gameOverOverlay = undefined;
+      this.tweens.add({
+        targets: this.gameOverOverlay,
+        alpha: 0,
+        duration: 300,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          if (this.gameOverOverlay) {
+            this.tweens.killTweensOf(this.gameOverOverlay);
+            this.gameOverOverlay.destroy();
+            this.gameOverOverlay = undefined;
+          }
+        },
+      });
     }
     if (this.levelCompleteOverlay) {
       for (const timer of this.levelCompleteTimers) {
@@ -945,8 +1008,19 @@ export class UIScene extends Phaser.Scene {
       }
       this.levelCompleteTweens = [];
       this.levelCompleteTween = undefined;
-      this.levelCompleteOverlay.destroy();
-      this.levelCompleteOverlay = undefined;
+      
+      this.tweens.add({
+        targets: this.levelCompleteOverlay,
+        alpha: 0,
+        duration: 300,
+        ease: 'Quad.easeIn',
+        onComplete: () => {
+          if (this.levelCompleteOverlay) {
+            this.levelCompleteOverlay.destroy();
+            this.levelCompleteOverlay = undefined;
+          }
+        },
+      });
     }
   }
 }

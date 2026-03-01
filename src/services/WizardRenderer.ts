@@ -33,6 +33,7 @@ export class WizardRenderer {
     this.createScroll();
     this.createArms();
     this.createStaff();
+    this.createDesk();
 
     this.startAnimations();
   }
@@ -128,20 +129,34 @@ export class WizardRenderer {
     face.fillStyle(skinColor, 1);
     face.fillEllipse(0, -50, 45, 40);
 
-    face.fillStyle(skinShadow, 0.5);
-    face.fillEllipse(0, -35, 35, 20);
+    face.fillStyle(skinShadow, 0.3);
+    face.fillEllipse(0, -40, 25, 12);
     
     const nose = this.scene.add.graphics();
     nose.fillStyle(skinShadow, 1);
     nose.beginPath();
-    nose.moveTo(0, -45);
-    nose.lineTo(-4, -30);
-    nose.lineTo(4, -30);
+    nose.moveTo(0, -52);
+    nose.lineTo(-5, -35);
+    nose.lineTo(5, -35);
     nose.closePath();
     nose.fillPath();
     
+    nose.fillStyle(skinColor, 0.7);
+    nose.beginPath();
+    nose.moveTo(0, -52);
+    nose.lineTo(-2, -38);
+    nose.lineTo(2, -38);
+    nose.closePath();
+    nose.fillPath();
+    
+    const nostrils = this.scene.add.graphics();
+    nostrils.fillStyle(0x8b6914, 0.6);
+    nostrils.fillEllipse(-3, -36, 2, 1.5);
+    nostrils.fillEllipse(3, -36, 2, 1.5);
+    
     this.container.add(face);
     this.container.add(nose);
+    this.container.add(nostrils);
   }
 
   private createEyes() {
@@ -197,7 +212,8 @@ export class WizardRenderer {
     
     beard.fillStyle(beardColor, 1);
     beard.beginPath();
-    beard.moveTo(-20, -25);
+    beard.moveTo(-22, -32);
+    beard.lineTo(-26, -20);
     beard.lineTo(-28, 0);
     beard.lineTo(-25, 25);
     beard.lineTo(-15, 50);
@@ -205,20 +221,23 @@ export class WizardRenderer {
     beard.lineTo(15, 50);
     beard.lineTo(25, 25);
     beard.lineTo(28, 0);
-    beard.lineTo(20, -25);
+    beard.lineTo(26, -20);
+    beard.lineTo(22, -32);
+    beard.lineTo(0, -28);
     beard.closePath();
     beard.fillPath();
-
-    beard.fillStyle(beardHighlight, 0.6);
+    
+    beard.fillStyle(beardHighlight, 0.5);
     beard.beginPath();
-    beard.moveTo(-15, -20);
-    beard.lineTo(-22, 5);
-    beard.lineTo(-18, 25);
-    beard.lineTo(-10, 40);
-    beard.lineTo(0, 45);
-    beard.lineTo(5, 35);
-    beard.lineTo(-5, 10);
-    beard.lineTo(-10, -20);
+    beard.moveTo(-15, -28);
+    beard.lineTo(-20, -10);
+    beard.lineTo(-18, 10);
+    beard.lineTo(-12, 35);
+    beard.lineTo(0, 42);
+    beard.lineTo(6, 30);
+    beard.lineTo(0, 5);
+    beard.lineTo(-8, -15);
+    beard.lineTo(-10, -28);
     beard.closePath();
     beard.fillPath();
     
@@ -244,30 +263,37 @@ export class WizardRenderer {
     const scrollShadow = 0xd4c4b0;
     const woodColor = 0x8b4513;
     const woodDark = 0x654321;
+    const inkColor = 0x1a1a1a;
     
-    this.scroll.fillStyle(scrollShadow, 1);
-    this.scroll.fillRoundedRect(-50 + wobble, 75, 100, 70, 8);
+    this.scroll.fillStyle(woodDark, 0.5);
+    this.scroll.fillEllipse(0 + wobble * 0.5, 120, 75, 18);
     
-    this.scroll.fillStyle(scrollColor, 1);
-    this.scroll.fillRoundedRect(-45 + wobble, 80, 90, 60, 6);
-
-    this.scroll.lineStyle(1, 0xc4a080, 0.5);
-    for (let i = 0; i < 4; i++) {
-      const lineY = 90 + i * 12;
-      this.scroll.lineBetween(-35 + wobble, lineY, 35 + wobble, lineY);
-    }
-
     this.scroll.fillStyle(woodDark, 1);
-    this.scroll.fillCircle(-50 + wobble, 110, 10);
-    this.scroll.fillCircle(50 + wobble, 110, 10);
+    this.scroll.fillEllipse(-55 + wobble, 105, 12, 8);
+    this.scroll.fillEllipse(55 + wobble, 105, 12, 8);
     
     this.scroll.fillStyle(woodColor, 1);
-    this.scroll.fillCircle(-50 + wobble, 110, 6);
-    this.scroll.fillCircle(50 + wobble, 110, 6);
+    this.scroll.fillEllipse(-55 + wobble, 105, 8, 5);
+    this.scroll.fillEllipse(55 + wobble, 105, 8, 5);
     
-    this.scroll.fillStyle(0xffd700, 0.4);
-    this.scroll.fillCircle(-50 + wobble, 110, 3);
-    this.scroll.fillCircle(50 + wobble, 110, 3);
+    this.scroll.fillStyle(0xffd700, 0.5);
+    this.scroll.fillEllipse(-55 + wobble, 104, 4, 2);
+    this.scroll.fillEllipse(55 + wobble, 104, 4, 2);
+    
+    this.scroll.fillStyle(scrollShadow, 1);
+    this.scroll.fillEllipse(0 + wobble, 103, 70, 20);
+    
+    this.scroll.fillStyle(scrollColor, 1);
+    this.scroll.fillEllipse(0 + wobble, 102, 65, 18);
+    
+    this.scroll.lineStyle(1, inkColor, 0.25);
+    for (let i = 0; i < 4; i++) {
+      const lineY = 97 + i * 4;
+      this.scroll.lineBetween(-45 + wobble, lineY, 45 + wobble, lineY);
+    }
+    
+    this.scroll.fillStyle(0xffd700, 0.15);
+    this.scroll.fillEllipse(-20 + wobble, 98, 20, 3);
   }
 
   private createArms() {
@@ -282,42 +308,286 @@ export class WizardRenderer {
 
   private createStaff() {
     const staff = this.scene.add.graphics();
-    const woodColor = 0x654321;
-    
-    staff.fillStyle(woodColor, 1);
-    staff.fillRect(80, -100, 8, 280);
-    
-    staff.fillStyle(0x8b4513, 0.5);
-    staff.fillRect(82, -100, 3, 280);
+    const woodColor = 0x5a3d2b;
+    const woodLight = 0x7a5d4b;
+    const goldColor = 0xc9a227;
+    const goldHighlight = 0xffd700;
 
+    staff.fillStyle(woodColor, 1);
+    staff.fillRoundedRect(80, -85, 10, 265, 3);
+    
+    staff.fillStyle(woodLight, 0.6);
+    staff.fillRect(82, -85, 4, 265);
+
+    for (let i = 0; i < 8; i++) {
+      const y = -70 + i * 35;
+      staff.lineStyle(1, woodLight, 0.3);
+      staff.beginPath();
+      staff.moveTo(81, y);
+      staff.lineTo(89, y + 10);
+      staff.strokePath();
+    }
+
+    const bands = [-80, 50, 150];
+    bands.forEach((y, i) => {
+      staff.fillStyle(goldColor, 1);
+      staff.fillRoundedRect(78, y, 14, 8, 2);
+      staff.fillStyle(goldHighlight, 0.5);
+      staff.fillRect(80, y + 1, 3, 6);
+      
+      if (i === 1) {
+        staff.fillStyle(0x4a0080, 0.9);
+        staff.fillCircle(85, y + 4, 3);
+        staff.fillStyle(0x9b30ff, 0.8);
+        staff.fillCircle(84, y + 3, 1.5);
+      }
+    });
+
+    const orbHolder = this.scene.add.graphics();
+    
+    orbHolder.fillStyle(goldColor, 1);
+    orbHolder.fillRoundedRect(74, -75, 20, 10, 3);
+    orbHolder.fillStyle(goldHighlight, 0.4);
+    orbHolder.fillRect(76, -74, 4, 8);
+    
+    orbHolder.lineStyle(4, goldColor, 1);
+    orbHolder.beginPath();
+    orbHolder.arc(84, -75, 18, Math.PI, 0, false);
+    orbHolder.strokePath();
+    
+    orbHolder.lineStyle(3, goldHighlight, 0.5);
+    orbHolder.beginPath();
+    orbHolder.arc(84, -75, 16, Math.PI, 0, false);
+    orbHolder.strokePath();
+
+    const numRibs = 5;
+    for (let i = 0; i < numRibs; i++) {
+      const angleOffset = (i / (numRibs - 1)) * Math.PI - Math.PI / 2;
+      const startX = 84 + Math.cos(angleOffset) * 18;
+      const startY = -75 + Math.sin(angleOffset) * 18;
+      const endX = 84 + Math.cos(angleOffset) * 28;
+      const endY = -75 + Math.sin(angleOffset) * 28 - 5;
+      
+      orbHolder.lineStyle(3, goldColor, 1);
+      orbHolder.beginPath();
+      orbHolder.moveTo(startX, startY);
+      orbHolder.lineTo(endX, endY);
+      orbHolder.strokePath();
+      
+      orbHolder.fillStyle(goldColor, 1);
+      orbHolder.fillCircle(endX, endY, 3);
+      orbHolder.fillStyle(goldHighlight, 0.6);
+      orbHolder.fillCircle(endX - 1, endY - 1, 1.5);
+    }
+
+    orbHolder.lineStyle(3, goldColor, 1);
+    orbHolder.beginPath();
+    orbHolder.arc(84, -80, 28, Math.PI * 1.2, Math.PI * 1.8, false);
+    orbHolder.strokePath();
+
+    const orbContainer = this.scene.add.container(84, -95);
+    
     const orbGlow = this.scene.add.graphics();
-    orbGlow.fillStyle(0xffd700, 0.2);
-    orbGlow.fillCircle(84, -120, 25);
+    orbGlow.fillStyle(0xffd700, 0.15);
+    orbGlow.fillCircle(0, 0, 25);
+    orbGlow.fillStyle(0xffd700, 0.25);
+    orbGlow.fillCircle(0, 0, 18);
     orbGlow.fillStyle(0xffd700, 0.4);
-    orbGlow.fillCircle(84, -120, 15);
+    orbGlow.fillCircle(0, 0, 12);
     orbGlow.fillStyle(0xffaa00, 0.8);
-    orbGlow.fillCircle(84, -120, 10);
+    orbGlow.fillCircle(0, 0, 8);
     orbGlow.fillStyle(0xffd700, 1);
-    orbGlow.fillCircle(84, -120, 5);
+    orbGlow.fillCircle(0, 0, 5);
+    orbGlow.fillStyle(0xffffff, 0.9);
+    orbGlow.fillCircle(-1.5, -1.5, 1.5);
+
+    orbContainer.add(orbGlow);
     
     this.container.add(staff);
-    this.container.add(orbGlow);
+    this.container.add(orbHolder);
+    this.container.add(orbContainer);
 
     this.scene.tweens.add({
-      targets: orbGlow,
-      scaleX: { from: 1, to: 1.2 },
-      scaleY: { from: 1, to: 1.2 },
-      alpha: { from: 1, to: 0.7 },
-      duration: 1000,
+      targets: orbContainer,
+      scaleX: { from: 1, to: 1.15 },
+      scaleY: { from: 1, to: 1.15 },
+      alpha: { from: 1, to: 0.8 },
+      duration: 1200,
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut',
     });
+
+    const particles = this.scene.add.graphics();
+    this.container.add(particles);
+    
+    const particleData = Array.from({ length: 6 }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      radius: 20 + Math.random() * 15,
+      speed: 0.005 + Math.random() * 0.01,
+      size: 1 + Math.random() * 2,
+    }));
+
+    this.scene.tweens.addCounter({
+      from: 0,
+      to: 360,
+      duration: 3000,
+      repeat: -1,
+      onUpdate: (tween) => {
+        particles.clear();
+        const time = (tween.getValue() ?? 0) * Math.PI / 180;
+        
+        particleData.forEach((p) => {
+          const currentAngle = p.angle + time * p.speed * 100;
+          const x = 84 + Math.cos(currentAngle) * p.radius;
+          const y = -95 + Math.sin(currentAngle) * p.radius * 0.5;
+          const alpha = 0.3 + Math.sin(time * 2 + p.angle) * 0.3;
+          
+          particles.fillStyle(0xffd700, alpha);
+          particles.fillCircle(x, y, p.size);
+        });
+      },
+    });
+  }
+
+  private createDesk() {
+    const desk = this.scene.add.graphics();
+    const woodDark = 0x2a1a0a;
+    const woodMid = 0x4a3020;
+    const woodLight = 0x6a4530;
+    const woodHighlight = 0x8a6050;
+    
+    desk.fillStyle(woodMid, 1);
+    desk.fillRoundedRect(-200, 115, 400, 45, 5);
+    
+    desk.fillStyle(woodLight, 1);
+    desk.fillRect(-198, 115, 396, 10);
+    
+    desk.fillStyle(woodHighlight, 0.5);
+    desk.fillRect(-195, 117, 390, 4);
+    
+    desk.lineStyle(2, woodDark, 0.6);
+    for (let i = 0; i < 8; i++) {
+      const x = -180 + i * 50;
+      desk.lineBetween(x, 118, x, 158);
+    }
+    
+    desk.fillStyle(woodDark, 1);
+    desk.fillRoundedRect(-200, 160, 400, 55, { tl: 0, tr: 0, bl: 5, br: 5 });
+    
+    desk.fillStyle(woodMid, 0.7);
+    desk.fillRect(-195, 165, 390, 45);
+    
+    desk.fillStyle(woodHighlight, 0.3);
+    desk.fillRect(-195, 165, 390, 5);
+    
+    desk.lineStyle(2, woodDark, 0.5);
+    desk.lineBetween(0, 160, 0, 215);
+    
+    desk.fillStyle(woodLight, 0.8);
+    desk.fillRoundedRect(-170, 175, 70, 30, 3);
+    desk.fillRoundedRect(100, 175, 70, 30, 3);
+    
+    desk.fillStyle(woodDark, 0.6);
+    desk.fillCircle(-135, 190, 4);
+    desk.fillCircle(135, 190, 4);
+    
+    desk.fillStyle(woodDark, 1);
+    desk.fillRoundedRect(-210, 215, 25, 80, 2);
+    desk.fillRoundedRect(185, 215, 25, 80, 2);
+    
+    desk.fillStyle(woodMid, 0.6);
+    desk.fillRect(-208, 217, 21, 76);
+    desk.fillRect(187, 217, 21, 76);
+    
+    const items = this.scene.add.graphics();
+    
+    items.fillStyle(0x8b0000, 1);
+    items.fillRoundedRect(-160, 95, 50, 22, 3);
+    items.fillStyle(0xa52a2a, 0.7);
+    items.fillRect(-158, 97, 46, 7);
+    
+    items.fillStyle(0xf5e6c8, 1);
+    items.fillRoundedRect(120, 100, 60, 18, 2);
+    items.fillStyle(0xe8d4b0, 0.6);
+    items.fillRect(122, 102, 56, 6);
+    items.lineStyle(1, 0x8b4513, 0.5);
+    items.lineBetween(130, 105, 170, 105);
+    items.lineBetween(130, 110, 160, 110);
+    
+    items.fillStyle(0xc9a227, 1);
+    items.fillCircle(-80, 105, 8);
+    items.fillStyle(0xffd700, 0.5);
+    items.fillCircle(-82, 103, 3);
+    
+    items.fillStyle(0x4a2c00, 1);
+    items.fillRoundedRect(50, 90, 25, 28, 2);
+    items.fillStyle(0x6a4c20, 0.6);
+    items.fillRect(52, 92, 21, 9);
+    
+    const quill = this.scene.add.graphics();
+    const featherWhite = 0xf0f0f0;
+    const featherGray = 0xc0c0c0;
+    const quillBrown = 0x8b4513;
+    
+    quill.fillStyle(featherWhite, 1);
+    quill.beginPath();
+    quill.moveTo(-50, 85);
+    quill.lineTo(-80, 35);
+    quill.lineTo(-75, 37);
+    quill.lineTo(-45, 80);
+    quill.closePath();
+    quill.fillPath();
+    
+    quill.fillStyle(featherGray, 0.6);
+    quill.beginPath();
+    quill.moveTo(-65, 65);
+    quill.lineTo(-77, 40);
+    quill.lineTo(-73, 43);
+    quill.lineTo(-60, 63);
+    quill.closePath();
+    quill.fillPath();
+    
+    quill.lineStyle(1, featherGray, 0.7);
+    for (let i = 0; i < 8; i++) {
+      const t = i / 7;
+      const x1 = -75 + t * 25;
+      const y1 = 40 + t * 35;
+      quill.lineBetween(x1, y1, x1 - 5 - i * 2, y1 - 15 - i * 3);
+    }
+    
+    quill.fillStyle(quillBrown, 1);
+    quill.beginPath();
+    quill.moveTo(-50, 85);
+    quill.lineTo(-47, 100);
+    quill.lineTo(-49, 110);
+    quill.lineTo(-51, 110);
+    quill.lineTo(-53, 100);
+    quill.lineTo(-50, 85);
+    quill.closePath();
+    quill.fillPath();
+    
+    quill.fillStyle(0x1a1a1a, 1);
+    quill.fillTriangle(-50, 110, -52, 117, -48, 117);
+    
+    const inkwell = this.scene.add.graphics();
+    inkwell.fillStyle(0x1a1a2e, 1);
+    inkwell.fillRoundedRect(-110, 95, 20, 20, 3);
+    inkwell.fillStyle(0x0d0d15, 1);
+    inkwell.fillEllipse(-100, 97, 10, 4);
+    inkwell.fillStyle(0x2a2a4e, 0.5);
+    inkwell.fillRect(-108, 96, 6, 3);
+    
+    this.container.add(desk);
+    this.container.add(items);
+    this.container.add(quill);
+    this.container.add(inkwell);
   }
 
   private drawArms(offset: number) {
     const sleeveColor = themeService.getNumber('character.hood');
     const handColor = 0xe8c4a0;
+    const handShadow = 0xd4a574;
     
     const leftHandY = 90 + offset;
     const rightHandY = 90 - offset;
@@ -326,35 +596,129 @@ export class WizardRenderer {
     this.leftArm.fillStyle(sleeveColor, 1);
     this.leftArm.beginPath();
     this.leftArm.moveTo(-70, 20);
-    this.leftArm.lineTo(-90, 80);
-    this.leftArm.lineTo(-50, 80);
+    this.leftArm.lineTo(-95, 75);
+    this.leftArm.lineTo(-50, 75);
     this.leftArm.lineTo(-50, 20);
     this.leftArm.closePath();
     this.leftArm.fillPath();
     
     this.leftArm.fillStyle(handColor, 1);
-    this.leftArm.fillCircle(-70, leftHandY, 14);
-    this.leftArm.fillStyle(handColor, 0.9);
-    for (let i = 0; i < 4; i++) {
-      this.leftArm.fillRect(-80 + i * 6, leftHandY + 10, 4, 12);
-    }
+    this.leftArm.beginPath();
+    this.leftArm.moveTo(-85, leftHandY);
+    this.leftArm.lineTo(-88, leftHandY + 5);
+    this.leftArm.lineTo(-52, leftHandY + 5);
+    this.leftArm.lineTo(-55, leftHandY);
+    this.leftArm.closePath();
+    this.leftArm.fillPath();
+    
+    this.leftArm.fillStyle(handShadow, 0.4);
+    this.leftArm.beginPath();
+    this.leftArm.arc(-70, leftHandY, 15, 0, Math.PI);
+    this.leftArm.fillPath();
+    
+    this.leftArm.fillStyle(handColor, 1);
+    this.leftArm.fillCircle(-70, leftHandY, 15);
+    
+    this.leftArm.fillStyle(handShadow, 0.3);
+    this.leftArm.fillCircle(-75, leftHandY - 3, 4);
+    
+    const leftFingerBases = [-82, -75, -67, -60];
+    const leftFingerLens = [16, 18, 17, 14];
+    const leftFingerWidths = [5, 6, 6, 5];
+    
+    leftFingerBases.forEach((baseX, i) => {
+      const len = leftFingerLens[i];
+      const w = leftFingerWidths[i];
+      const curve = (i - 1.5) * 3;
+      
+      this.leftArm.fillStyle(handColor, 1);
+      this.leftArm.beginPath();
+      this.leftArm.moveTo(baseX - w/2, leftHandY + 12);
+      this.leftArm.lineTo(baseX - w/2 + curve/2, leftHandY + 12 + len);
+      this.leftArm.lineTo(baseX + w/2 + curve/2, leftHandY + 12 + len);
+      this.leftArm.lineTo(baseX + w/2, leftHandY + 12);
+      this.leftArm.closePath();
+      this.leftArm.fillPath();
+      
+      this.leftArm.fillStyle(handShadow, 0.3);
+      this.leftArm.fillCircle(baseX + curve/2, leftHandY + 12 + len, w/2 + 1);
+      
+      this.leftArm.lineStyle(0.5, handShadow, 0.4);
+      this.leftArm.lineBetween(baseX - 1, leftHandY + 12, baseX - 1 + curve/3, leftHandY + 12 + len - 2);
+    });
+    
+    this.leftArm.fillStyle(handColor, 0.95);
+    this.leftArm.beginPath();
+    this.leftArm.moveTo(-88, leftHandY + 5);
+    this.leftArm.lineTo(-92, leftHandY + 20);
+    this.leftArm.lineTo(-85, leftHandY + 22);
+    this.leftArm.lineTo(-82, leftHandY + 12);
+    this.leftArm.closePath();
+    this.leftArm.fillPath();
     
     this.rightArm.clear();
     this.rightArm.fillStyle(sleeveColor, 1);
     this.rightArm.beginPath();
     this.rightArm.moveTo(50, 20);
-    this.rightArm.lineTo(90, 80);
-    this.rightArm.lineTo(50, 80);
+    this.rightArm.lineTo(95, 75);
+    this.rightArm.lineTo(50, 75);
     this.rightArm.lineTo(70, 20);
     this.rightArm.closePath();
     this.rightArm.fillPath();
     
     this.rightArm.fillStyle(handColor, 1);
-    this.rightArm.fillCircle(70, rightHandY, 14);
-    this.rightArm.fillStyle(handColor, 0.9);
-    for (let i = 0; i < 4; i++) {
-      this.rightArm.fillRect(56 + i * 6, rightHandY + 10, 4, 12);
-    }
+    this.rightArm.beginPath();
+    this.rightArm.moveTo(55, rightHandY);
+    this.rightArm.lineTo(52, rightHandY + 5);
+    this.rightArm.lineTo(88, rightHandY + 5);
+    this.rightArm.lineTo(85, rightHandY);
+    this.rightArm.closePath();
+    this.rightArm.fillPath();
+    
+    this.rightArm.fillStyle(handShadow, 0.4);
+    this.rightArm.beginPath();
+    this.rightArm.arc(70, rightHandY, 15, 0, Math.PI);
+    this.rightArm.fillPath();
+    
+    this.rightArm.fillStyle(handColor, 1);
+    this.rightArm.fillCircle(70, rightHandY, 15);
+    
+    this.rightArm.fillStyle(handShadow, 0.3);
+    this.rightArm.fillCircle(65, rightHandY - 3, 4);
+    
+    const rightFingerBases = [58, 65, 73, 80];
+    const rightFingerLens = [16, 18, 17, 14];
+    const rightFingerWidths = [5, 6, 6, 5];
+    
+    rightFingerBases.forEach((baseX, i) => {
+      const len = rightFingerLens[i];
+      const w = rightFingerWidths[i];
+      const curve = (i - 1.5) * -3;
+      
+      this.rightArm.fillStyle(handColor, 1);
+      this.rightArm.beginPath();
+      this.rightArm.moveTo(baseX - w/2, rightHandY + 12);
+      this.rightArm.lineTo(baseX - w/2 + curve/2, rightHandY + 12 + len);
+      this.rightArm.lineTo(baseX + w/2 + curve/2, rightHandY + 12 + len);
+      this.rightArm.lineTo(baseX + w/2, rightHandY + 12);
+      this.rightArm.closePath();
+      this.rightArm.fillPath();
+      
+      this.rightArm.fillStyle(handShadow, 0.3);
+      this.rightArm.fillCircle(baseX + curve/2, rightHandY + 12 + len, w/2 + 1);
+      
+      this.rightArm.lineStyle(0.5, handShadow, 0.4);
+      this.rightArm.lineBetween(baseX + 1, rightHandY + 12, baseX + 1 + curve/3, rightHandY + 12 + len - 2);
+    });
+    
+    this.rightArm.fillStyle(handColor, 0.95);
+    this.rightArm.beginPath();
+    this.rightArm.moveTo(88, rightHandY + 5);
+    this.rightArm.lineTo(92, rightHandY + 20);
+    this.rightArm.lineTo(85, rightHandY + 22);
+    this.rightArm.lineTo(82, rightHandY + 12);
+    this.rightArm.closePath();
+    this.rightArm.fillPath();
   }
 
   private startAnimations() {

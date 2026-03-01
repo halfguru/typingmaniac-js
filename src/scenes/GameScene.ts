@@ -272,6 +272,10 @@ export class GameScene extends Phaser.Scene {
     if (targetWord && targetWord.textValue.toLowerCase() === this.typedInput.toLowerCase()) {
       this.onWordComplete(targetWord);
     } else {
+      audioService.playTypingError();
+      if (targetWord) {
+        targetWord.speed *= 1.5;
+      }
       this.effects.showWrongWordPopup(targetWord);
       this.wizard.onWordFail();
       this.typedInput = '';
