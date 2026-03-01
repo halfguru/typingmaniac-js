@@ -7,8 +7,10 @@ import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 import { SettingsScene } from './scenes/SettingsScene';
 import { initObservability } from './services/ObservabilityService';
+import { initAnalytics } from './services/AnalyticsService';
 
 initObservability();
+initAnalytics();
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,

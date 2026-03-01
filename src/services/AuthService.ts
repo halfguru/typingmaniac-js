@@ -1,5 +1,6 @@
 import { createClient, User, SupabaseClient } from '@supabase/supabase-js';
 import { setUser, clearUser, addBreadcrumb, captureException } from './ObservabilityService';
+import { identifyUser, resetUser as resetAnalyticsUser, trackAuthSignIn, trackAuthSignOut } from './AnalyticsService';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -38,10 +39,15 @@ class AuthServiceImpl {
         if (event === 'SIGNED_IN' && session?.user) {
           this.currentUser = this.mapUser(session.user);
           setUser(this.currentUser.id, this.currentUser.name);
-          addBreadcrumb('auth', 'User signed in', { method: session.user.app_metadata?.provider || 'unknown' });
+          identifyUser(this.currentUser.id, { name: this.currentUser.name });
+          const provider = session.user.app_metadata?.provider || (session.user.is_anonymous ? 'guest' : 'unknown');
+          trackAuthSignIn(provider === 'email' ? 'google' : provider === 'facebook' ? 'facebook' : 'guest');
+          addBreadcrumb('auth', 'User signed in', { method: provider });
         } else if (event === 'SIGNED_OUT') {
           this.currentUser = null;
           clearUser();
+          resetAnalyticsUser();
+          trackAuthSignOut();
           addBreadcrumb('auth', 'User signed out');
         }
         if (this.onAuthChangeCallback) {

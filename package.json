@@ -16,6 +16,7 @@
   "dependencies": {
     "@sentry/browser": "^10.40.0",
     "@supabase/supabase-js": "^2.98.0",
-    "phaser": "^3.70.0"
+    "phaser": "^3.70.0",
+    "posthog-js": "^1.356.1"
   }
 }

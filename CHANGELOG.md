@@ -11,15 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **PostHog Analytics** - Optional privacy-friendly analytics
+  - Track game events: starts, game overs, level completions, power-up usage
+  - Track UI interactions: tutorial, settings, leaderboard views
+  - Track authentication events: sign in, sign out
 - **Sentry Error Tracking** - Optional production error monitoring
 - **Local Leaderboard** - Fallback when Supabase not configured
 - **ESC to Menu** - Return to main menu from game over screen
 - **OAuth Logos** - Google (G) and Facebook (f) logos on sign-in buttons
-- **Version Display** - Show version number in menu
+- **Version Badge** - More visible version display in menu (top-left)
 
 ### Changed
 
 - **Supabase is now optional** - Game works without any configuration
+- **Improved observability** - All services now optional and configurable via environment variables
 - **Improved countdown scene** - Ring animation with particles and burst effect
 - **Improved UX** - Better button positioning and navigation
 

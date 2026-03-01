@@ -5,6 +5,7 @@ import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 import { themeService } from '../services/ThemeService';
 import { storageService, LeaderboardEntry } from '../services/StorageService';
+import { trackTutorialView, trackSettingsView, trackLeaderboardView } from '../services/AnalyticsService';
 
 export class MenuScene extends Phaser.Scene {
   private tutorialOverlay?: Phaser.GameObjects.Container;
@@ -131,6 +132,7 @@ export class MenuScene extends Phaser.Scene {
 
     this.createSecondaryButton(columnX, startY + (secondaryButtonH + buttonSpacing) * 2, secondaryButtonW, secondaryButtonH, '⚙️ SETTINGS', () => {
       audioService.playButtonClick();
+      trackSettingsView();
       this.scene.pause();
       this.scene.launch('SettingsScene');
     });
@@ -262,6 +264,8 @@ export class MenuScene extends Phaser.Scene {
 
   showTutorial() {
     if (this.tutorialOverlay) return;
+
+    trackTutorialView();
 
     this.tutorialOverlay = this.add.container(0, 0);
     this.tutorialOverlay.setDepth(500);
@@ -522,6 +526,7 @@ export class MenuScene extends Phaser.Scene {
     if (this.leaderboardOverlay) return;
 
     const isGlobal = authService.isConfigured();
+    trackLeaderboardView(isGlobal);
     
     if (isGlobal) {
       this.leaderboardData = await authService.getLeaderboard(20);

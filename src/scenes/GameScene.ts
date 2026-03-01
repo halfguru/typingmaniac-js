@@ -7,6 +7,7 @@ import { GameConfigService } from '../services/GameConfigService';
 import { EffectManager } from '../managers/EffectManager';
 import { themeService } from '../services/ThemeService';
 import { WizardRenderer } from '../services/WizardRenderer';
+import { trackGameStart, trackGameOver, trackLevelComplete, trackPowerUpUsed } from '../services/AnalyticsService';
 import {
   GAME_AREA_WIDTH,
   GAME_HEIGHT,
@@ -67,6 +68,7 @@ export class GameScene extends Phaser.Scene {
     this.input.keyboard!.on('keydown', this.handleKeyDown, this);
     this.scene.launch('UIScene');
     this.events.emit('gameDataUpdate', this.getGameData());
+    trackGameStart(themeService.getTheme());
   }
 
   createWizard() {
@@ -340,6 +342,8 @@ export class GameScene extends Phaser.Scene {
 
   activatePower(power: PowerType) {
     this.removePowerFromStack(power);
+    
+    trackPowerUpUsed(power);
 
     this.effects.showPowerFlash(power !== 'none' ? POWER_COLORS[power] : 0xffffff);
     if (power !== 'none') {
@@ -445,6 +449,7 @@ export class GameScene extends Phaser.Scene {
     if (this.progressPct >= 100 && this.gameState === 'playing') {
       this.gameState = 'levelComplete';
       audioService.playLevelComplete();
+      trackLevelComplete(this.level, this.score, this.calculateAccuracy());
     }
 
     this.events.emit('gameDataUpdate', this.getGameData());
@@ -636,6 +641,7 @@ export class GameScene extends Phaser.Scene {
           this.gameState = 'gameOver';
           audioService.playGameOver();
           audioService.stopMusic();
+          trackGameOver(this.score, this.level, this.wordsCompleted, this.wordsMissed);
         }
         toRemove.push(word);
       }

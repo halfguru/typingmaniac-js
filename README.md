@@ -68,11 +68,16 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 # Optional: Sentry (for error tracking)
 VITE_SENTRY_DSN=your_sentry_dsn
 VITE_APP_VERSION=1.0.0
+
+# Optional: PostHog (for analytics)
+VITE_POSTHOG_KEY=your_posthog_key
+VITE_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
 **Without configuration:**
 - Game works fully with local leaderboard only
 - Errors are logged to console instead of Sentry
+- Analytics events are logged to console instead of PostHog
 - No authentication required
 
 ---
@@ -86,6 +91,7 @@ VITE_APP_VERSION=1.0.0
 | Bundler | [Vite](https://vitejs.dev/) |
 | Auth & Database | [Supabase](https://supabase.com/) (optional) |
 | Error Tracking | [Sentry](https://sentry.io/) (optional) |
+| Analytics | [PostHog](https://posthog.com/) (optional) |
 
 ---
 
