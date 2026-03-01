@@ -335,7 +335,7 @@ export class MenuScene extends Phaser.Scene {
       y += 28;
     }
 
-    const section2Y = panelY + 195;
+    const section2Y = panelY + 205;
     const section2Header = this.add.text(panelX + 25, section2Y, '⚡ POWER-UPS', {
       fontFamily: FONT_FAMILY,
       fontSize: '18px',
@@ -399,7 +399,7 @@ export class MenuScene extends Phaser.Scene {
       y += 42;
     }
 
-    const section3Y = panelY + 410;
+    const section3Y = panelY + 425;
     const section3Header = this.add.text(panelX + 25, section3Y, '🎯 OBJECTIVES', {
       fontFamily: FONT_FAMILY,
       fontSize: '18px',
