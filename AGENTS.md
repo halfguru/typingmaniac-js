@@ -68,6 +68,21 @@ Theme files are in `src/themes/` and include colors, fonts, and visual settings.
 - `ThemeService` - Manages theme switching and color access
 - `AudioService` - Sound effects for typing, errors, power-ups, game events
 - `GameConfigService` - Loads game parameters from JSON config
+- `AuthService` - Supabase authentication (Google, Facebook, Guest) - optional
+- `ObservabilityService` - Sentry error tracking - optional
+- `AnalyticsService` - PostHog analytics - optional
+
+### Optional Services
+
+All backend services are optional. The game works fully without any configuration:
+- Without Supabase: Local leaderboard only, no authentication
+- Without Sentry: Errors logged to console only
+- Without PostHog: Analytics events logged to console only
+
+Environment variables (in `.env`):
+- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` - Supabase
+- `VITE_SENTRY_DSN` - Sentry error tracking
+- `VITE_POSTHOG_KEY` / `VITE_POSTHOG_HOST` - PostHog analytics
 
 ### Word Mechanics
 
