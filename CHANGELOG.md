@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **License changed to CC BY-NC 4.0** - Non-commercial use only
 - **Supabase is now optional** - Game works without any configuration
 - **Improved observability** - All services now optional and configurable via environment variables
 - **Improved countdown scene** - Ring animation with particles and burst effect

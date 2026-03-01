@@ -8,7 +8,9 @@
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Phaser](https://img.shields.io/badge/Phaser-3.70-3178C6?style=flat)](https://phaser.io/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC%204.0-green.svg)](LICENSE)
+
+<img src="docs/screenshot.png" alt="Typing Maniac Screenshot" width="800">
 
 </div>
 
@@ -125,7 +127,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
 
 ## 📜 License
 
-[MIT](LICENSE) © 2025 halfguru
+[CC BY-NC 4.0](LICENSE) - Free for personal and educational use. Commercial use prohibited.
 
 ---
 
