@@ -39,13 +39,19 @@ export class MenuScene extends Phaser.Scene {
     title.setOrigin(0.5, 0.5);
     title.setShadow(4, 4, '#0a2a4a', 8, true, true);
 
-    const version = this.add.text(GAME_WIDTH - 15, GAME_HEIGHT - 15, 'v1.1.0', {
+    const versionBg = this.add.graphics();
+    versionBg.fillStyle(themeService.getNumber('bg.sidebar'), 0.9);
+    versionBg.fillRoundedRect(10, 10, 70, 28, 8);
+    versionBg.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.5);
+    versionBg.strokeRoundedRect(10, 10, 70, 28, 8);
+
+    const version = this.add.text(45, 24, 'v1.1.0', {
       fontFamily: FONT_FAMILY,
-      fontSize: '14px',
-      color: themeService.getText('text.secondary'),
+      fontSize: '16px',
+      color: themeService.getText('text.primary'),
+      fontStyle: 'bold',
     });
-    version.setOrigin(1, 1);
-    version.setAlpha(0.6);
+    version.setOrigin(0.5, 0.5);
 
     const user = authService.getUser();
     if (user) {
