@@ -9,7 +9,13 @@ const isConfigured = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 let supabase: SupabaseClient | null = null;
 if (isConfigured) {
-  supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+  supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  });
 }
 
 export interface GlobalLeaderboardEntry {
@@ -86,7 +92,7 @@ class AuthServiceImpl {
 
   async initialize(): Promise<AuthUser | null> {
     if (!supabase) return null;
-    
+
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       this.currentUser = this.mapUser(session.user);
