@@ -1,6 +1,6 @@
-import type { Theme, ThemeName } from './types';
-import { defaultTheme } from './default';
 import { alchemistTheme } from './alchemist';
+import { defaultTheme } from './default';
+import type { Theme, ThemeName } from './types';
 
 const themes: Record<ThemeName, Theme> = {
   default: defaultTheme,
@@ -11,6 +11,6 @@ export function getTheme(name: ThemeName): Theme {
   return themes[name];
 }
 
-export { defaultTheme } from './default';
 export { alchemistTheme } from './alchemist';
-export type { Theme, ThemeName, ThemeColors, ThemeFonts } from './types';
+export { defaultTheme } from './default';
+export type { Theme, ThemeColors, ThemeFonts,ThemeName } from './types';

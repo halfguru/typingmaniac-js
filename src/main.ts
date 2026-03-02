@@ -1,13 +1,14 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from './config/constants';
+
+import { GAME_HEIGHT,GAME_WIDTH } from './config/constants';
 import { AuthScene } from './scenes/AuthScene';
-import { MenuScene } from './scenes/MenuScene';
 import { CountdownScene } from './scenes/CountdownScene';
 import { GameScene } from './scenes/GameScene';
-import { UIScene } from './scenes/UIScene';
+import { MenuScene } from './scenes/MenuScene';
 import { SettingsScene } from './scenes/SettingsScene';
-import { initObservability } from './services/ObservabilityService';
+import { UIScene } from './scenes/UIScene';
 import { initAnalytics } from './services/AnalyticsService';
+import { initObservability } from './services/ObservabilityService';
 
 initObservability();
 initAnalytics();

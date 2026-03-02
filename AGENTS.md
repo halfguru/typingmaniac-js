@@ -101,7 +101,9 @@ npm run preview # Preview production build
 
 ## Pre-Commit
 
-Always run: `npx tsc --noEmit` to check for TypeScript errors.
+Always run:
+- `npm run lint` to check formatting and code quality
+- `npx tsc --noEmit` to check for TypeScript errors
 
 ## PR Workflow
 

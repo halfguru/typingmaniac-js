@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, FONT_FAMILY } from '../config/constants';
-import { authService, GlobalLeaderboardEntry } from '../services/AuthService';
+
+import { FONT_FAMILY,GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { trackLeaderboardView,trackSettingsView, trackTutorialView } from '../services/AnalyticsService';
 import { audioService } from '../services/AudioService';
+import { authService, GlobalLeaderboardEntry } from '../services/AuthService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
+import { LeaderboardEntry,storageService } from '../services/StorageService';
 import { themeService } from '../services/ThemeService';
-import { storageService, LeaderboardEntry } from '../services/StorageService';
-import { trackTutorialView, trackSettingsView, trackLeaderboardView } from '../services/AnalyticsService';
 
 export class MenuScene extends Phaser.Scene {
   private tutorialOverlay?: Phaser.GameObjects.Container;

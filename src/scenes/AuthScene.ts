@@ -1,9 +1,10 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, FONT_FAMILY } from '../config/constants';
-import { authService, AuthUser } from '../services/AuthService';
-import { themeService } from '../services/ThemeService';
+
+import { FONT_FAMILY,GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import { audioService } from '../services/AudioService';
+import { authService, AuthUser } from '../services/AuthService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
+import { themeService } from '../services/ThemeService';
 
 export class AuthScene extends Phaser.Scene {
   private loading = false;

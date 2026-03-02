@@ -1,6 +1,7 @@
-import { createClient, User, SupabaseClient } from '@supabase/supabase-js';
-import { setUser, clearUser, addBreadcrumb, captureException } from './ObservabilityService';
+import { createClient, SupabaseClient,User } from '@supabase/supabase-js';
+
 import { identifyUser, resetUser as resetAnalyticsUser, trackAuthSignIn, trackAuthSignOut } from './AnalyticsService';
+import { addBreadcrumb, captureException,clearUser, setUser } from './ObservabilityService';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;

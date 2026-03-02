@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import type { PowerType } from '../types';
-import { GAME_AREA_WIDTH, GAME_WIDTH, GAME_HEIGHT, COLORS, POWER_COLORS, FONT_FAMILY } from '../config/constants';
+
+import { COLORS, FONT_FAMILY,GAME_AREA_WIDTH, GAME_HEIGHT, GAME_WIDTH, POWER_COLORS } from '../config/constants';
 import { themeService } from '../services/ThemeService';
+import type { PowerType } from '../types';
 
 const INPUT_CONTAINER_W = 600;
 const INPUT_CONTAINER_H = 60;

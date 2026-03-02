@@ -1,22 +1,23 @@
 import Phaser from 'phaser';
+
 import {
-  GAME_WIDTH,
-  GAME_HEIGHT,
-  SIDEBAR_WIDTH,
-  GAME_AREA_WIDTH,
-  MAX_POWER_STACK,
   FONT_FAMILY,
-  POWER_SYMBOLS,
+  GAME_AREA_WIDTH,
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  MAX_POWER_STACK,
   POWER_COLORS,
   POWER_NAMES,
+  POWER_SYMBOLS,
+  SIDEBAR_WIDTH,
 } from '../config/constants';
-import type { PowerType, GameData } from '../types';
-import { storageService } from '../services/StorageService';
-import { authService } from '../services/AuthService';
-import { themeService } from '../services/ThemeService';
 import { audioService } from '../services/AudioService';
-import type { GameScene } from './GameScene';
+import { authService } from '../services/AuthService';
+import { storageService } from '../services/StorageService';
+import { themeService } from '../services/ThemeService';
+import type { GameData,PowerType } from '../types';
 import { ProgressBar } from '../ui/ProgressBar';
+import type { GameScene } from './GameScene';
 
 export class UIScene extends Phaser.Scene {
   private levelText!: Phaser.GameObjects.Text;

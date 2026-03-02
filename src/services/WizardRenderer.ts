@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+
 import { GAME_AREA_WIDTH, GAME_HEIGHT } from '../config/constants';
 import { themeService } from './ThemeService';
 
