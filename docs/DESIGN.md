@@ -37,15 +37,7 @@ Based on `design-example.png` - Original Typing Maniac UI design.
 
 The game supports multiple visual themes that can be switched via the settings menu.
 
-### Cyberpunk Theme (default)
-Neon cyberpunk aesthetic with:
-- Grid floor with perspective
-- City skyline silhouette
-- Floating particles
-- Scanline effects
-- Ambient glow
-
-### Alchemist Theme
+### Alchemist Theme (default)
 Mystical wizard's study with:
 - Grand library bookshelves
 - Animated wizard character with:
@@ -58,7 +50,15 @@ Mystical wizard's study with:
 - Magic circles and ambient energy
 - Mystical fog effects
 
-Theme files: `src/themes/default.ts`, `src/themes/alchemist.ts`
+### Cyberpunk Theme
+Neon cyberpunk aesthetic with:
+- Grid floor with perspective
+- City skyline silhouette
+- Floating particles
+- Scanline effects
+- Ambient glow
+
+Theme files: `src/themes/alchemist.ts`, `src/themes/default.ts`
 
 ## Color Palette
 
@@ -75,10 +75,12 @@ Theme files: `src/themes/default.ts`, `src/themes/alchemist.ts`
 
 ## Game Scenes
 
-1. **Menu Scene** - Title, play button, tutorial/settings/scores
-2. **Countdown Scene** - 3-2-1 countdown
-3. **Game Scene** - Falling words, typing, powers
-4. **UI Scene** - Sidebar overlay with stats, mute button
+1. **Auth Scene** - Sign in options (Google, Facebook, Guest)
+2. **Menu Scene** - Title, play button, tutorial/settings/scores
+3. **Countdown Scene** - 3-2-1 countdown
+4. **Game Scene** - Falling words, typing, powers
+5. **UI Scene** - Sidebar overlay with stats, mute button
+6. **Settings Scene** - Volume controls, theme selection
 
 ## Game Mechanics
 

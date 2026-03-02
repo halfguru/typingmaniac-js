@@ -56,8 +56,8 @@
 ### Themes
 
 The game supports multiple visual themes:
+- **alchemist** (default) - Magical library theme with wizard character
 - **default** - Cyberpunk/neon theme with matrix-style effects
-- **alchemist** - Magical library theme with wizard character
 
 Theme files are in `src/themes/` and include colors, fonts, and visual settings.
 
@@ -97,6 +97,10 @@ Environment variables (in `.env`):
 npm run dev     # Start development server (hot reload)
 npm run build   # Production build to dist/
 npm run preview # Preview production build
+npm run lint    # Check formatting and code quality
+npm run lint:fix # Auto-fix lint issues
+npm run test    # Run Playwright tests
+npm run test:ui # Run tests with interactive UI
 ```
 
 ## Pre-Commit
@@ -109,9 +113,14 @@ Always run:
 
 When creating a PR:
 1. Make code changes
-2. Run `npx tsc --noEmit` to verify
-3. **Once ready to merge**: bump version in `package.json` and update `CHANGELOG.md`
-4. Commit and push to feature branch
-5. Create PR with conventional commit title
+2. Run `npm run lint && npx tsc --noEmit` to verify
+3. Run `npm run test` to verify tests pass
+4. **Once ready to merge**: bump version in `package.json` and update `CHANGELOG.md`
+5. Commit and push to feature branch
+6. Create PR with:
+   - Conventional commit title
+   - Clear description of changes
+   - Assign yourself
+   - Add appropriate labels (bug, enhancement, docs, etc.)
 
 **Important**: Only bump version once when PR is complete, not with every commit.
