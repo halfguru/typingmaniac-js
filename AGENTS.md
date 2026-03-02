@@ -102,3 +102,10 @@ npm run preview # Preview production build
 ## Pre-Commit
 
 Always run: `npx tsc --noEmit` to check for TypeScript errors.
+
+## PR Workflow
+
+Before creating a PR:
+1. Update version in `package.json` (follow semver: patch for fixes, minor for features)
+2. Update `CHANGELOG.md` under `[Unreleased]` section (follow Keep a Changelog format)
+3. Commit the version bump and changelog with your changes
