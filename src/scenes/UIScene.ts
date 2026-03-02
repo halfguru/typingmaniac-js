@@ -370,29 +370,30 @@ export class UIScene extends Phaser.Scene {
     return -1;
   }
 
-  updatePowerBoxes(data: GameData) {
-    for (const tween of this.powerTweens) {
-      tween.stop();
-    }
-    this.powerTweens = [];
+ updatePowerBoxes(data: GameData) {
+    const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
+    const sidebarX = sidebarCenterX - this.powerBoxW / 2;
+    const startY = 378;
+    const gap = 8;
+    const boxW = this.powerBoxW;
+    const boxH = this.powerBoxH;
 
     for (let i = 0; i < MAX_POWER_STACK; i++) {
       const graphics = this.powerBoxGraphics[i];
       const glowGraphic = this.powerGlowGraphics[i];
       const label = this.powerLabels[i];
-      const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
-      const sidebarX = sidebarCenterX - this.powerBoxW / 2;
-      const startY = 378;
-      const gap = 8;
-      const y = startY + i * (this.powerBoxH + gap);
-      const boxW = this.powerBoxW;
-      const boxH = this.powerBoxH;
+      const y = startY + i * (boxH + gap);
+
+      if (!graphics || !graphics.active) {
+        console.warn('[UIScene] powerBoxGraphics or powerGlowGraphics inactive at index', i);
+        return;
+      }
 
       graphics.clear();
       glowGraphic.clear();
 
-      if (i < data.powerStack.length) {
-        const power = data.powerStack[i];
+      const power = data.powerStack[i];
+      if (power) {
         const color = POWER_COLORS[power];
 
         graphics.fillStyle(themeService.getNumber('bg.sidebar'), 0.8);
