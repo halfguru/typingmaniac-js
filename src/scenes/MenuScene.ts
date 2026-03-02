@@ -183,6 +183,8 @@ export class MenuScene extends Phaser.Scene {
       });
     }
 
+    this.createFooter();
+
     this.input.keyboard!.on('keydown-ENTER', () => {
       audioService.playButtonClick();
       this.transitionTo('CountdownScene');
@@ -844,5 +846,44 @@ export class MenuScene extends Phaser.Scene {
 
   formatNumber(n: number): string {
     return n.toLocaleString();
+  }
+
+  createFooter() {
+    const footerY = GAME_HEIGHT - 20;
+    const centerX = GAME_WIDTH / 2;
+
+    this.load.once('complete', () => {
+      const githubIcon = this.add.image(centerX - 55, footerY, 'github-icon');
+      githubIcon.setDisplaySize(18, 18);
+      githubIcon.setAlpha(0.7);
+
+      const footerText = this.add.text(centerX - 40, footerY, 'Made by halfguru', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '14px',
+        color: themeService.getText('text.secondary'),
+      });
+      footerText.setOrigin(0, 0.5);
+      footerText.setAlpha(0.7);
+
+      const hitArea = this.add.rectangle(centerX, footerY, 160, 24, 0x000000, 0);
+      hitArea.setInteractive({ useHandCursor: true });
+
+      hitArea.on('pointerover', () => {
+        footerText.setAlpha(1);
+        githubIcon.setAlpha(1);
+      });
+
+      hitArea.on('pointerout', () => {
+        footerText.setAlpha(0.7);
+        githubIcon.setAlpha(0.7);
+      });
+
+      hitArea.on('pointerdown', () => {
+        window.open('https://github.com/halfguru/typingmaniac-ts', '_blank');
+      });
+    });
+
+    this.load.image('github-icon', 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png');
+    this.load.start();
   }
 }

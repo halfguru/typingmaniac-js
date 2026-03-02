@@ -13,6 +13,11 @@ export class AuthScene extends Phaser.Scene {
     super({ key: 'AuthScene' });
   }
 
+  preload() {
+    this.load.image('google-icon', 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg');
+    this.load.image('facebook-icon', 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/facebook/facebook-original.svg');
+  }
+
   create() {
     if (!authService.isConfigured()) {
       this.scene.start('MenuScene');
@@ -83,7 +88,7 @@ export class AuthScene extends Phaser.Scene {
     });
     subtitle.setOrigin(0.5, 0.5);
 
-    this.createOAuthButton(centerX, panelY + 85, 'Continue with Google', 0xdb4437, 'G', async () => {
+    this.createOAuthButton(centerX, panelY + 85, 'Continue with Google', 0xdb4437, 'google-icon', async () => {
       if (this.loading) return;
       this.loading = true;
       this.showLoading();
@@ -95,7 +100,7 @@ export class AuthScene extends Phaser.Scene {
       }
     });
 
-    this.createOAuthButton(centerX, panelY + 150, 'Continue with Facebook', 0x1877f2, 'f', async () => {
+    this.createOAuthButton(centerX, panelY + 150, 'Continue with Facebook', 0x1877f2, 'facebook-icon', async () => {
       if (this.loading) return;
       this.loading = true;
       this.showLoading();
@@ -139,7 +144,7 @@ export class AuthScene extends Phaser.Scene {
     guestNote.setOrigin(0.5, 0.5);
   }
 
-  createOAuthButton(x: number, y: number, text: string, color: number, logo: string, onClick: () => void) {
+  createOAuthButton(x: number, y: number, text: string, color: number, iconKey: string, onClick: () => void) {
     const buttonW = 320;
     const buttonH = 50;
 
@@ -149,13 +154,8 @@ export class AuthScene extends Phaser.Scene {
 
     this.add.circle(x - buttonW / 2 + 30, y, 16, 0xffffff, 1);
     
-    const logoText = this.add.text(x - buttonW / 2 + 30, y, logo, {
-      fontFamily: FONT_FAMILY,
-      fontSize: '18px',
-      color: '#' + color.toString(16).padStart(6, '0'),
-      fontStyle: 'bold',
-    });
-    logoText.setOrigin(0.5, 0.5);
+    const icon = this.add.image(x - buttonW / 2 + 30, y, iconKey);
+    icon.setDisplaySize(24, 24);
 
     const label = this.add.text(x + 10, y, text, {
       fontFamily: FONT_FAMILY,
