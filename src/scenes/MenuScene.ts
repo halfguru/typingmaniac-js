@@ -47,7 +47,7 @@ export class MenuScene extends Phaser.Scene {
     versionBg.lineStyle(1, themeService.getNumber('ui.panelBorder'), 0.5);
     versionBg.strokeRoundedRect(10, 10, 70, 28, 8);
 
-    const version = this.add.text(45, 24, 'v1.1.0', {
+    const version = this.add.text(45, 24, `v${import.meta.env.VITE_APP_VERSION}`, {
       fontFamily: FONT_FAMILY,
       fontSize: '16px',
       color: themeService.getText('text.primary'),
@@ -958,7 +958,7 @@ export class MenuScene extends Phaser.Scene {
       });
 
       hitArea.on('pointerdown', () => {
-        window.open('https://github.com/halfguru/typingmaniac-ts', '_blank');
+        window.open('https://github.com/halfguru/typing-maniac-clone', '_blank');
       });
     });
 

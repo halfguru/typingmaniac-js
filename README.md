@@ -4,11 +4,16 @@
 
 **A web-based recreation of the classic Facebook game**
 
-*Words fall. You type. They vanish.*
+*Type fast. Score high.*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178C6?style=flat&logo=typescript)](https://www.typescriptlang.org/)
 [![Phaser](https://img.shields.io/badge/Phaser-3.70-3178C6?style=flat)](https://phaser.io/)
 [![License](https://img.shields.io/badge/License-CC%20BY--NC%204.0-green.svg)](LICENSE)
+
+[![Lint](https://github.com/halfguru/typing-maniac-clone/actions/workflows/lint.yml/badge.svg)](https://github.com/halfguru/typing-maniac-clone/actions/workflows/lint.yml)
+[![Test](https://github.com/halfguru/typing-maniac-clone/actions/workflows/test.yml/badge.svg)](https://github.com/halfguru/typing-maniac-clone/actions/workflows/test.yml)
+[![Build](https://github.com/halfguru/typing-maniac-clone/actions/workflows/build.yml/badge.svg)](https://github.com/halfguru/typing-maniac-clone/actions/workflows/build.yml)
+[![Deploy](https://github.com/halfguru/typing-maniac-clone/actions/workflows/deploy.yml/badge.svg)](https://github.com/halfguru/typing-maniac-clone/actions/workflows/deploy.yml)
 
 <img src="docs/screenshot.png" alt="Typing Maniac Screenshot" width="800">
 
@@ -18,7 +23,7 @@
 
 ## 🎮 How to Play
 
-Words fall from the top of the screen. Type them letter-by-letter to destroy them before they reach the bottom. **One mistake costs you!**
+Words fall from the top of the screen. Type them letter-by-letter to destroy them before they reach the danger zone. Wrong submissions speed up the target word, so type carefully!
 
 ### Power-Ups
 
@@ -34,8 +39,8 @@ Collect power words to activate special abilities:
 ### Themes
 
 The game features multiple visual themes:
-- **Cyberpunk** (default): Neon cyberpunk aesthetic with grid floor and city skyline
-- **Alchemist**: Mystical wizard's study with animated wizard character, magical effects, and alchemical atmosphere
+- **Alchemist** (default): Mystical wizard's study with animated wizard character, magical effects, and alchemical atmosphere
+- **Cyberpunk**: Neon cyberpunk aesthetic with grid floor and city skyline
 
 ### Features
 
