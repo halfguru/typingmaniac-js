@@ -780,6 +780,8 @@ export class MenuScene extends Phaser.Scene {
       ? Math.min(this.leaderboardData.length, 10)
       : Math.min(this.localLeaderboardData.length, 5);
 
+    console.log('[Leaderboard] userRank:', userRank, 'displayCount:', displayCount);
+
     if (userRank && userRank.rank > displayCount) {
       const yourBestY = panelY + 130 + displayCount * 42 + 20;
       
