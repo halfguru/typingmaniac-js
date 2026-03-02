@@ -58,6 +58,27 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
+  init() {
+    this.words = [];
+    this.typedInput = '';
+    this.score = 0;
+    this.level = 1;
+    this.limitPct = 0;
+    this.progressPct = 0;
+    this.powerStack = [];
+    this.wordsCompleted = 0;
+    this.wordsMissed = 0;
+    this.gameState = 'playing';
+    this.spawnTimer = 0;
+    this.slowFactor = 1;
+    this.iceActive = false;
+    this.iceTimer = 0;
+    this.slowActive = false;
+    this.slowTimer = 0;
+    this.combo = 0;
+    this.levelStartScore = 0;
+  }
+
   create() {
     this.effects = new EffectManager(this);
     this.drawBackground();
