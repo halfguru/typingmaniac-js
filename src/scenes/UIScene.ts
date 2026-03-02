@@ -36,6 +36,7 @@ export class UIScene extends Phaser.Scene {
   private levelCompleteTimer?: Phaser.Time.TimerEvent;
   private levelCompleteTimers: Phaser.Time.TimerEvent[] = [];
   private levelCompleteTweens: Phaser.Tweens.Tween[] = [];
+  private gameScene?: GameScene;
 
   private progressBarH = 195;
   private progressBarW = 40;
@@ -49,18 +50,40 @@ export class UIScene extends Phaser.Scene {
   }
 
   create() {
+    this.powerBoxGraphics = [];
+    this.powerGlowGraphics = [];
+    this.powerLabels = [];
+    this.powerContainers = [];
+    this.powerTweens = [];
+    this.previousPowerStack = [];
+    this.displayedScore = 0;
+    this.displayedLevel = 1;
+
     this.drawSidebar();
     this.createPowerBoxes();
     this.createProgressBars();
     this.createMuteButton();
 
-    const gameScene = this.scene.get('GameScene') as GameScene;
-    gameScene.events.on('gameDataUpdate', (data: GameData) => {
-      this.updateUI(data);
-    });
-    gameScene.events.on('gameReset', () => {
-      this.resetUI();
-    });
+    this.gameScene = this.scene.get('GameScene') as GameScene;
+    this.gameScene.events.on('gameDataUpdate', this.updateUI, this);
+    this.gameScene.events.on('gameReset', this.resetUI, this);
+  }
+
+  shutdown() {
+    if (this.gameScene) {
+      this.gameScene.events.off('gameDataUpdate', this.updateUI, this);
+      this.gameScene.events.off('gameReset', this.resetUI, this);
+    }
+    
+    for (const tween of this.powerTweens) {
+      tween.stop();
+    }
+    this.powerTweens = [];
+    this.powerBoxGraphics = [];
+    this.powerGlowGraphics = [];
+    this.powerLabels = [];
+    this.powerContainers = [];
+    this.previousPowerStack = [];
   }
 
   resetUI() {
