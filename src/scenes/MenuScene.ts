@@ -560,6 +560,9 @@ export class MenuScene extends Phaser.Scene {
       this.localLeaderboardData = storageService.getLeaderboard();
     }
 
+    const userRank = isGlobal ? await authService.getUserRank() : null;
+    const user = authService.getUser();
+
     this.leaderboardOverlay = this.add.container(0, 0);
     this.leaderboardOverlay.setDepth(500);
 
@@ -771,6 +774,79 @@ export class MenuScene extends Phaser.Scene {
           this.leaderboardOverlay.add(levelLabel);
         }
       }
+    }
+
+    const displayCount = isGlobal 
+      ? Math.min(this.leaderboardData.length, 10)
+      : Math.min(this.localLeaderboardData.length, 5);
+
+    if (userRank && userRank.rank > displayCount) {
+      const yourBestY = panelY + 130 + displayCount * 42 + 20;
+      
+      const yourBestBg = this.add.graphics();
+      yourBestBg.fillStyle(themeService.getNumber('ui.panelBorder'), 0.15);
+      yourBestBg.fillRoundedRect(panelX + 15, yourBestY - 18, panelW - 30, 36, 8);
+      this.leaderboardOverlay.add(yourBestBg);
+
+      const rankLabel = this.add.text(panelX + 45, yourBestY, `#${userRank.rank}`, {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: '#ffd700',
+        fontStyle: 'bold',
+      });
+      rankLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(rankLabel);
+
+      const avatarX = panelX + 90;
+      const avatarBg = this.add.circle(avatarX, yourBestY, 16, themeService.getNumber('ui.panelBorder'), 0.5);
+      this.leaderboardOverlay.add(avatarBg);
+
+      if (user?.avatar && this.textures.exists(`avatar_${user.id}`)) {
+        const avatar = this.add.image(avatarX, yourBestY, `avatar_${user.id}`);
+        avatar.setDisplaySize(32, 32);
+        const maskGraphics = this.make.graphics({});
+        maskGraphics.fillStyle(0xffffff);
+        maskGraphics.fillCircle(avatarX, yourBestY, 16);
+        const mask = maskGraphics.createGeometryMask();
+        avatar.setMask(mask);
+        this.leaderboardOverlay.add(avatar);
+      } else {
+        const initial = user?.name?.charAt(0).toUpperCase() || '?';
+        const initialText = this.add.text(avatarX, yourBestY, initial, {
+          fontFamily: FONT_FAMILY,
+          fontSize: '14px',
+          color: themeService.getText('text.primary'),
+          fontStyle: 'bold',
+        });
+        initialText.setOrigin(0.5, 0.5);
+        this.leaderboardOverlay.add(initialText);
+      }
+
+      const nameLabel = this.add.text(panelX + 115, yourBestY, 'You', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: themeService.getText('text.primary'),
+        fontStyle: 'bold',
+      });
+      nameLabel.setOrigin(0, 0.5);
+      this.leaderboardOverlay.add(nameLabel);
+
+      const scoreLabel = this.add.text(panelX + panelW - 140, yourBestY, this.formatNumber(userRank.score), {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: themeService.getText('text.primary'),
+        fontStyle: 'bold',
+      });
+      scoreLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(scoreLabel);
+
+      const levelLabel = this.add.text(panelX + panelW - 50, yourBestY, `${userRank.level}`, {
+        fontFamily: FONT_FAMILY,
+        fontSize: '16px',
+        color: themeService.getText('text.secondary'),
+      });
+      levelLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(levelLabel);
     }
 
     const closeText = this.add.text(GAME_WIDTH / 2, panelY + panelH - 35, 'Press ESC or click anywhere to close', {

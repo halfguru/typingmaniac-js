@@ -69,4 +69,14 @@ export const storageService = {
     if (leaderboard.length === 0) return score > 0;
     return score > leaderboard[0].score;
   },
+
+  getBestScore(): { score: number; level: number; rank: number } | null {
+    const leaderboard = this.getLeaderboard();
+    if (leaderboard.length === 0) return null;
+    return {
+      score: leaderboard[0].score,
+      level: leaderboard[0].level,
+      rank: 1,
+    };
+  },
 };

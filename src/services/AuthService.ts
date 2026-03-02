@@ -266,6 +266,42 @@ class AuthServiceImpl {
       return [];
     }
   }
+
+  async getUserRank(): Promise<{ rank: number; score: number; level: number; total: number } | null> {
+    if (!supabase) return null;
+    
+    const user = this.getUser();
+    if (!user) return null;
+
+    try {
+      const { data, count } = await supabase
+        .from('leaderboard')
+        .select('user_id, score, level', { count: 'exact' })
+        .order('score', { ascending: false });
+
+      if (!data) return null;
+
+      let rank = 1;
+      let userScore = 0;
+      let userLevel = 1;
+      
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].user_id === user.id) {
+          rank = i + 1;
+          userScore = data[i].score;
+          userLevel = data[i].level;
+          break;
+        }
+      }
+
+      if (userScore === 0) return null;
+
+      return { rank, score: userScore, level: userLevel, total: count || data.length };
+    } catch (err) {
+      captureException(err as Error, { operation: 'getUserRank' });
+      return null;
+    }
+  }
 }
 
 export const authService = new AuthServiceImpl();
