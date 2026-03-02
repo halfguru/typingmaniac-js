@@ -1,6 +1,7 @@
-import { createClient, User, SupabaseClient } from '@supabase/supabase-js';
-import { setUser, clearUser, addBreadcrumb, captureException } from './ObservabilityService';
+import { createClient, SupabaseClient,User } from '@supabase/supabase-js';
+
 import { identifyUser, resetUser as resetAnalyticsUser, trackAuthSignIn, trackAuthSignOut } from './AnalyticsService';
+import { addBreadcrumb, captureException,clearUser, setUser } from './ObservabilityService';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -264,6 +265,42 @@ class AuthServiceImpl {
     } catch (err) {
       captureException(err as Error, { operation: 'getLeaderboard' });
       return [];
+    }
+  }
+
+  async getUserRank(): Promise<{ rank: number; score: number; level: number; total: number } | null> {
+    if (!supabase) return null;
+    
+    const user = this.getUser();
+    if (!user) return null;
+
+    try {
+      const { data, count } = await supabase
+        .from('leaderboard')
+        .select('user_id, score, level', { count: 'exact' })
+        .order('score', { ascending: false });
+
+      if (!data) return null;
+
+      let rank = -1;
+      let userScore = 0;
+      let userLevel = 1;
+      
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].user_id === user.id) {
+          rank = i + 1;
+          userScore = data[i].score;
+          userLevel = data[i].level;
+          break;
+        }
+      }
+
+      if (rank === -1) return null;
+
+      return { rank, score: userScore, level: userLevel, total: count || data.length };
+    } catch (err) {
+      captureException(err as Error, { operation: 'getUserRank' });
+      return null;
     }
   }
 }

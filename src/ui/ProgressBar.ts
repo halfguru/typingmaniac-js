@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+
 import { FONT_FAMILY } from '../config/constants';
 
 export type ProgressBarOrientation = 'horizontal' | 'vertical';
@@ -124,7 +125,8 @@ export class ProgressBar extends Phaser.GameObjects.Container {
 
   private createLabel(scene: Phaser.Scene, config: ProgressBarConfig, glowColor: number): Phaser.GameObjects.Text {
     const labelPos = config.labelPosition ?? (config.orientation === 'vertical' ? 'top' : 'left');
-    let x = 0, y = 0, originX = 0.5, originY = 0.5;
+    let x = 0, y = 0, originX = 0.5;
+    const originY = 0.5;
 
     switch (labelPos) {
       case 'top':
@@ -156,7 +158,8 @@ export class ProgressBar extends Phaser.GameObjects.Container {
 
   private createValueText(scene: Phaser.Scene, config: ProgressBarConfig, glowColor: number): Phaser.GameObjects.Text {
     const valuePos = config.valuePosition ?? (config.orientation === 'vertical' ? 'bottom' : 'right');
-    let x = 0, y = 0, originX = 0.5, originY = 0.5;
+    let x = 0, y = 0, originX = 0.5;
+    const originY = 0.5;
 
     switch (valuePos) {
       case 'top':
@@ -221,11 +224,13 @@ export class ProgressBar extends Phaser.GameObjects.Container {
       duration: 200,
       ease: 'Power2',
       onUpdate: (tween) => {
+        if (!this.active) return;
         const value = tween.getValue() ?? targetValue;
         this.drawFill(value);
         this.updateValueText(value);
       },
       onComplete: () => {
+        if (!this.active) return;
         this.currentValue = targetValue;
         this.currentTween = null;
       },
@@ -269,7 +274,7 @@ export class ProgressBar extends Phaser.GameObjects.Container {
   }
 
   private updateValueText(value: number) {
-    if (!this.valueText) return;
+    if (!this.valueText || !this.valueText.active) return;
     const max = this.config.maxValue ?? 100;
     const pct = Math.round((value / max) * 100);
     this.valueText.setText(`${pct}%`);

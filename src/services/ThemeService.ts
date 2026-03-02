@@ -1,6 +1,6 @@
-import type { Theme, ThemeName } from '../themes/types';
-import { defaultTheme } from '../themes/default';
 import { alchemistTheme } from '../themes/alchemist';
+import { defaultTheme } from '../themes/default';
+import type { Theme, ThemeName } from '../themes/types';
 
 const STORAGE_KEY = 'typingmaniac-theme';
 

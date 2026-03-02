@@ -1,22 +1,23 @@
 import Phaser from 'phaser';
-import type { PowerType, GameState as GState } from '../types';
-import { wordService } from '../services/WordService';
+
+import {
+  DANGER_ZONE_Y,
+  FONT_FAMILY,
+  FONT_SIZE,
+  GAME_AREA_WIDTH,
+  GAME_HEIGHT,
+  POWER_COLORS,
+  POWER_KEYS,
+} from '../config/constants';
+import { EffectManager } from '../managers/EffectManager';
+import { trackGameOver, trackGameStart, trackLevelComplete, trackPowerUpUsed } from '../services/AnalyticsService';
 import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 import { GameConfigService } from '../services/GameConfigService';
-import { EffectManager } from '../managers/EffectManager';
 import { themeService } from '../services/ThemeService';
 import { WizardRenderer } from '../services/WizardRenderer';
-import { trackGameStart, trackGameOver, trackLevelComplete, trackPowerUpUsed } from '../services/AnalyticsService';
-import {
-  GAME_AREA_WIDTH,
-  GAME_HEIGHT,
-  DANGER_ZONE_Y,
-  POWER_KEYS,
-  FONT_FAMILY,
-  FONT_SIZE,
-  POWER_COLORS,
-} from '../config/constants';
+import { wordService } from '../services/WordService';
+import type { GameState as GState,PowerType } from '../types';
 
 interface WordObject {
   text: Phaser.GameObjects.Text;
@@ -56,6 +57,27 @@ export class GameScene extends Phaser.Scene {
 
   constructor() {
     super({ key: 'GameScene' });
+  }
+
+  init() {
+    this.words = [];
+    this.typedInput = '';
+    this.score = 0;
+    this.level = 1;
+    this.limitPct = 0;
+    this.progressPct = 0;
+    this.powerStack = [];
+    this.wordsCompleted = 0;
+    this.wordsMissed = 0;
+    this.gameState = 'playing';
+    this.spawnTimer = 0;
+    this.slowFactor = 1;
+    this.iceActive = false;
+    this.iceTimer = 0;
+    this.slowActive = false;
+    this.slowTimer = 0;
+    this.combo = 0;
+    this.levelStartScore = 0;
   }
 
   create() {

@@ -33,7 +33,7 @@ class WordService {
     try {
       const arr = Array.from(this.recentWords).slice(-MAX_RECENT_WORDS);
       localStorage.setItem('recentWords', JSON.stringify(arr));
-    } catch {}
+    } catch { /* localStorage unavailable */ }
   }
 
   getWord(length: number): string {

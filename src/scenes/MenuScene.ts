@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, FONT_FAMILY } from '../config/constants';
-import { authService, GlobalLeaderboardEntry } from '../services/AuthService';
+
+import { FONT_FAMILY,GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
+import { trackLeaderboardView,trackSettingsView, trackTutorialView } from '../services/AnalyticsService';
 import { audioService } from '../services/AudioService';
+import { authService, GlobalLeaderboardEntry } from '../services/AuthService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
+import { LeaderboardEntry,storageService } from '../services/StorageService';
 import { themeService } from '../services/ThemeService';
-import { storageService, LeaderboardEntry } from '../services/StorageService';
-import { trackTutorialView, trackSettingsView, trackLeaderboardView } from '../services/AnalyticsService';
 
 export class MenuScene extends Phaser.Scene {
   private tutorialOverlay?: Phaser.GameObjects.Container;
@@ -182,6 +183,8 @@ export class MenuScene extends Phaser.Scene {
         this.scene.start('AuthScene');
       });
     }
+
+    this.createFooter();
 
     this.input.keyboard!.on('keydown-ENTER', () => {
       audioService.playButtonClick();
@@ -558,14 +561,23 @@ export class MenuScene extends Phaser.Scene {
       this.localLeaderboardData = storageService.getLeaderboard();
     }
 
+    const userRank = isGlobal ? await authService.getUserRank() : null;
+    const user = authService.getUser();
+
     this.leaderboardOverlay = this.add.container(0, 0);
     this.leaderboardOverlay.setDepth(500);
 
     const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.85);
     this.leaderboardOverlay.add(bg);
 
+    const displayCount = isGlobal 
+      ? Math.min(this.leaderboardData.length, 10)
+      : Math.min(this.localLeaderboardData.length, 5);
+
+    const showUserRank = userRank && userRank.rank > displayCount;
+    const extraHeight = showUserRank ? 60 : 0;
     const panelW = 700;
-    const panelH = 580;
+    const panelH = 580 + extraHeight;
     const panelX = GAME_WIDTH / 2 - panelW / 2;
     const panelY = GAME_HEIGHT / 2 - panelH / 2;
 
@@ -771,6 +783,75 @@ export class MenuScene extends Phaser.Scene {
       }
     }
 
+    if (showUserRank) {
+      const yourBestY = panelY + 130 + displayCount * 42 + 20;
+      
+      const yourBestBg = this.add.graphics();
+      yourBestBg.fillStyle(themeService.getNumber('ui.panelBorder'), 0.15);
+      yourBestBg.fillRoundedRect(panelX + 15, yourBestY - 18, panelW - 30, 36, 8);
+      this.leaderboardOverlay.add(yourBestBg);
+
+      const rankLabel = this.add.text(panelX + 45, yourBestY, `#${userRank.rank}`, {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: '#ffd700',
+        fontStyle: 'bold',
+      });
+      rankLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(rankLabel);
+
+      const avatarX = panelX + 90;
+      const avatarBg = this.add.circle(avatarX, yourBestY, 16, themeService.getNumber('ui.panelBorder'), 0.5);
+      this.leaderboardOverlay.add(avatarBg);
+
+      if (user?.avatar && this.textures.exists(`avatar_${user.id}`)) {
+        const avatar = this.add.image(avatarX, yourBestY, `avatar_${user.id}`);
+        avatar.setDisplaySize(32, 32);
+        const maskGraphics = this.make.graphics({});
+        maskGraphics.fillStyle(0xffffff);
+        maskGraphics.fillCircle(avatarX, yourBestY, 16);
+        const mask = maskGraphics.createGeometryMask();
+        avatar.setMask(mask);
+        this.leaderboardOverlay.add(avatar);
+      } else {
+        const initial = user?.name?.charAt(0).toUpperCase() || '?';
+        const initialText = this.add.text(avatarX, yourBestY, initial, {
+          fontFamily: FONT_FAMILY,
+          fontSize: '14px',
+          color: themeService.getText('text.primary'),
+          fontStyle: 'bold',
+        });
+        initialText.setOrigin(0.5, 0.5);
+        this.leaderboardOverlay.add(initialText);
+      }
+
+      const nameLabel = this.add.text(panelX + 115, yourBestY, 'You', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: themeService.getText('text.primary'),
+        fontStyle: 'bold',
+      });
+      nameLabel.setOrigin(0, 0.5);
+      this.leaderboardOverlay.add(nameLabel);
+
+      const scoreLabel = this.add.text(panelX + panelW - 140, yourBestY, this.formatNumber(userRank.score), {
+        fontFamily: FONT_FAMILY,
+        fontSize: '18px',
+        color: themeService.getText('text.primary'),
+        fontStyle: 'bold',
+      });
+      scoreLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(scoreLabel);
+
+      const levelLabel = this.add.text(panelX + panelW - 50, yourBestY, `${userRank.level}`, {
+        fontFamily: FONT_FAMILY,
+        fontSize: '16px',
+        color: themeService.getText('text.secondary'),
+      });
+      levelLabel.setOrigin(0.5, 0.5);
+      this.leaderboardOverlay.add(levelLabel);
+    }
+
     const closeText = this.add.text(GAME_WIDTH / 2, panelY + panelH - 35, 'Press ESC or click anywhere to close', {
       fontFamily: FONT_FAMILY,
       fontSize: '16px',
@@ -844,5 +925,44 @@ export class MenuScene extends Phaser.Scene {
 
   formatNumber(n: number): string {
     return n.toLocaleString();
+  }
+
+  createFooter() {
+    const footerY = GAME_HEIGHT - 20;
+    const centerX = GAME_WIDTH / 2;
+
+    this.load.once('complete', () => {
+      const githubIcon = this.add.image(centerX - 55, footerY, 'github-icon');
+      githubIcon.setDisplaySize(18, 18);
+      githubIcon.setAlpha(0.7);
+
+      const footerText = this.add.text(centerX - 40, footerY, 'Made by halfguru', {
+        fontFamily: FONT_FAMILY,
+        fontSize: '14px',
+        color: themeService.getText('text.secondary'),
+      });
+      footerText.setOrigin(0, 0.5);
+      footerText.setAlpha(0.7);
+
+      const hitArea = this.add.rectangle(centerX, footerY, 160, 24, 0x000000, 0);
+      hitArea.setInteractive({ useHandCursor: true });
+
+      hitArea.on('pointerover', () => {
+        footerText.setAlpha(1);
+        githubIcon.setAlpha(1);
+      });
+
+      hitArea.on('pointerout', () => {
+        footerText.setAlpha(0.7);
+        githubIcon.setAlpha(0.7);
+      });
+
+      hitArea.on('pointerdown', () => {
+        window.open('https://github.com/halfguru/typingmaniac-ts', '_blank');
+      });
+    });
+
+    this.load.image('github-icon', 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png');
+    this.load.start();
   }
 }

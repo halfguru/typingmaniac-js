@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT } from '../config/constants';
+
+import { GAME_HEIGHT,GAME_WIDTH } from '../config/constants';
 import { themeService } from './ThemeService';
 
 export class BackgroundRenderer {

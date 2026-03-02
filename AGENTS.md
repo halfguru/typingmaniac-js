@@ -101,4 +101,17 @@ npm run preview # Preview production build
 
 ## Pre-Commit
 
-Always run: `npx tsc --noEmit` to check for TypeScript errors.
+Always run:
+- `npm run lint` to check formatting and code quality
+- `npx tsc --noEmit` to check for TypeScript errors
+
+## PR Workflow
+
+When creating a PR:
+1. Make code changes
+2. Run `npx tsc --noEmit` to verify
+3. **Once ready to merge**: bump version in `package.json` and update `CHANGELOG.md`
+4. Commit and push to feature branch
+5. Create PR with conventional commit title
+
+**Important**: Only bump version once when PR is complete, not with every commit.

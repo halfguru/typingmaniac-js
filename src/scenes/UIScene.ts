@@ -1,22 +1,23 @@
 import Phaser from 'phaser';
+
 import {
-  GAME_WIDTH,
-  GAME_HEIGHT,
-  SIDEBAR_WIDTH,
-  GAME_AREA_WIDTH,
-  MAX_POWER_STACK,
   FONT_FAMILY,
-  POWER_SYMBOLS,
+  GAME_AREA_WIDTH,
+  GAME_HEIGHT,
+  GAME_WIDTH,
+  MAX_POWER_STACK,
   POWER_COLORS,
   POWER_NAMES,
+  POWER_SYMBOLS,
+  SIDEBAR_WIDTH,
 } from '../config/constants';
-import type { PowerType, GameData } from '../types';
-import { storageService } from '../services/StorageService';
-import { authService } from '../services/AuthService';
-import { themeService } from '../services/ThemeService';
 import { audioService } from '../services/AudioService';
-import type { GameScene } from './GameScene';
+import { authService } from '../services/AuthService';
+import { storageService } from '../services/StorageService';
+import { themeService } from '../services/ThemeService';
+import type { GameData,PowerType } from '../types';
 import { ProgressBar } from '../ui/ProgressBar';
+import type { GameScene } from './GameScene';
 
 export class UIScene extends Phaser.Scene {
   private levelText!: Phaser.GameObjects.Text;
@@ -36,6 +37,7 @@ export class UIScene extends Phaser.Scene {
   private levelCompleteTimer?: Phaser.Time.TimerEvent;
   private levelCompleteTimers: Phaser.Time.TimerEvent[] = [];
   private levelCompleteTweens: Phaser.Tweens.Tween[] = [];
+  private gameScene?: GameScene;
 
   private progressBarH = 195;
   private progressBarW = 40;
@@ -49,18 +51,47 @@ export class UIScene extends Phaser.Scene {
   }
 
   create() {
+    if (this.limitBar) {
+      this.limitBar.destroy();
+    }
+    if (this.progressBar) {
+      this.progressBar.destroy();
+    }
+
+    this.powerBoxGraphics = [];
+    this.powerGlowGraphics = [];
+    this.powerLabels = [];
+    this.powerContainers = [];
+    this.powerTweens = [];
+    this.previousPowerStack = [];
+    this.displayedScore = 0;
+    this.displayedLevel = 1;
+
     this.drawSidebar();
     this.createPowerBoxes();
     this.createProgressBars();
     this.createMuteButton();
 
-    const gameScene = this.scene.get('GameScene') as GameScene;
-    gameScene.events.on('gameDataUpdate', (data: GameData) => {
-      this.updateUI(data);
-    });
-    gameScene.events.on('gameReset', () => {
-      this.resetUI();
-    });
+    this.gameScene = this.scene.get('GameScene') as GameScene;
+    this.gameScene.events.on('gameDataUpdate', this.updateUI, this);
+    this.gameScene.events.on('gameReset', this.resetUI, this);
+  }
+
+  shutdown() {
+    if (this.gameScene) {
+      this.gameScene.events.off('gameDataUpdate', this.updateUI, this);
+      this.gameScene.events.off('gameReset', this.resetUI, this);
+    }
+    
+    for (const tween of this.powerTweens) {
+      tween.stop();
+    }
+    this.powerTweens = [];
+    this.powerBoxGraphics = [];
+    this.powerGlowGraphics = [];
+    this.powerLabels = [];
+    this.powerContainers = [];
+    this.previousPowerStack = [];
   }
 
   resetUI() {
@@ -340,29 +371,30 @@ export class UIScene extends Phaser.Scene {
     return -1;
   }
 
-  updatePowerBoxes(data: GameData) {
-    for (const tween of this.powerTweens) {
-      tween.stop();
-    }
-    this.powerTweens = [];
+ updatePowerBoxes(data: GameData) {
+    const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
+    const sidebarX = sidebarCenterX - this.powerBoxW / 2;
+    const startY = 378;
+    const gap = 8;
+    const boxW = this.powerBoxW;
+    const boxH = this.powerBoxH;
 
     for (let i = 0; i < MAX_POWER_STACK; i++) {
       const graphics = this.powerBoxGraphics[i];
       const glowGraphic = this.powerGlowGraphics[i];
       const label = this.powerLabels[i];
-      const sidebarCenterX = GAME_AREA_WIDTH + SIDEBAR_WIDTH / 2;
-      const sidebarX = sidebarCenterX - this.powerBoxW / 2;
-      const startY = 378;
-      const gap = 8;
-      const y = startY + i * (this.powerBoxH + gap);
-      const boxW = this.powerBoxW;
-      const boxH = this.powerBoxH;
+      const y = startY + i * (boxH + gap);
+
+      if (!graphics || !graphics.active) {
+        console.warn('[UIScene] powerBoxGraphics or powerGlowGraphics inactive at index', i);
+        return;
+      }
 
       graphics.clear();
       glowGraphic.clear();
 
-      if (i < data.powerStack.length) {
-        const power = data.powerStack[i];
+      const power = data.powerStack[i];
+      if (power) {
         const color = POWER_COLORS[power];
 
         graphics.fillStyle(themeService.getNumber('bg.sidebar'), 0.8);

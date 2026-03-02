@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { GAME_WIDTH, GAME_HEIGHT, FONT_FAMILY } from '../config/constants';
+
+import { FONT_FAMILY,GAME_HEIGHT, GAME_WIDTH } from '../config/constants';
 import { audioService } from '../services/AudioService';
 import { BackgroundRenderer } from '../services/BackgroundRenderer';
 import { themeService } from '../services/ThemeService';

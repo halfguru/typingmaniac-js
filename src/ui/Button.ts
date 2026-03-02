@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+
 import { FONT_FAMILY } from '../config/constants';
 
 export interface ButtonConfig {
