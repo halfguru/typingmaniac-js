@@ -569,8 +569,14 @@ export class MenuScene extends Phaser.Scene {
     const bg = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.85);
     this.leaderboardOverlay.add(bg);
 
+    const displayCount = isGlobal 
+      ? Math.min(this.leaderboardData.length, 10)
+      : Math.min(this.localLeaderboardData.length, 5);
+
+    const showUserRank = userRank && userRank.rank > displayCount;
+    const extraHeight = showUserRank ? 60 : 0;
     const panelW = 700;
-    const panelH = 580;
+    const panelH = 580 + extraHeight;
     const panelX = GAME_WIDTH / 2 - panelW / 2;
     const panelY = GAME_HEIGHT / 2 - panelH / 2;
 
@@ -776,13 +782,7 @@ export class MenuScene extends Phaser.Scene {
       }
     }
 
-    const displayCount = isGlobal 
-      ? Math.min(this.leaderboardData.length, 10)
-      : Math.min(this.localLeaderboardData.length, 5);
-
-    console.log('[Leaderboard] userRank:', userRank, 'displayCount:', displayCount);
-
-    if (userRank && userRank.rank > displayCount) {
+    if (showUserRank) {
       const yourBestY = panelY + 130 + displayCount * 42 + 20;
       
       const yourBestBg = this.add.graphics();

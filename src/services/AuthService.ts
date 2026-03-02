@@ -279,8 +279,6 @@ class AuthServiceImpl {
         .select('user_id, score, level', { count: 'exact' })
         .order('score', { ascending: false });
 
-      console.log('[getUserRank] user:', user.id, 'data:', data?.length, 'count:', count);
-
       if (!data) return null;
 
       let rank = -1;
@@ -292,15 +290,11 @@ class AuthServiceImpl {
           rank = i + 1;
           userScore = data[i].score;
           userLevel = data[i].level;
-          console.log('[getUserRank] Found user at index:', i, 'rank:', rank, 'score:', userScore);
           break;
         }
       }
 
-      if (rank === -1) {
-        console.log('[getUserRank] User not found in leaderboard');
-        return null;
-      }
+      if (rank === -1) return null;
 
       return { rank, score: userScore, level: userLevel, total: count || data.length };
     } catch (err) {
