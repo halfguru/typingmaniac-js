@@ -221,11 +221,13 @@ export class ProgressBar extends Phaser.GameObjects.Container {
       duration: 200,
       ease: 'Power2',
       onUpdate: (tween) => {
+        if (!this.active) return;
         const value = tween.getValue() ?? targetValue;
         this.drawFill(value);
         this.updateValueText(value);
       },
       onComplete: () => {
+        if (!this.active) return;
         this.currentValue = targetValue;
         this.currentTween = null;
       },
@@ -269,7 +271,7 @@ export class ProgressBar extends Phaser.GameObjects.Container {
   }
 
   private updateValueText(value: number) {
-    if (!this.valueText) return;
+    if (!this.valueText || !this.valueText.active) return;
     const max = this.config.maxValue ?? 100;
     const pct = Math.round((value / max) * 100);
     this.valueText.setText(`${pct}%`);

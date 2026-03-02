@@ -1,10 +1,26 @@
 {
   "progression": {
     "wordsPerLevel": [
-      { "minLevel": 1, "maxLevel": 2, "words": 8 },
-      { "minLevel": 3, "maxLevel": 4, "words": 10 },
-      { "minLevel": 5, "maxLevel": 6, "words": 12 },
-      { "minLevel": 7, "maxLevel": 999, "words": 14 }
+      {
+        "minLevel": 1,
+        "maxLevel": 2,
+        "words": 1
+      },
+      {
+        "minLevel": 3,
+        "maxLevel": 4,
+        "words": 10
+      },
+      {
+        "minLevel": 5,
+        "maxLevel": 6,
+        "words": 12
+      },
+      {
+        "minLevel": 7,
+        "maxLevel": 999,
+        "words": 14
+      }
     ]
   },
   "scoring": {
@@ -13,10 +29,26 @@
   },
   "combo": {
     "levels": [
-      { "minWords": 9, "text": "GOOD", "multiplier": 1.2 },
-      { "minWords": 18, "text": "GREAT", "multiplier": 1.5 },
-      { "minWords": 27, "text": "PERFECT", "multiplier": 2.0 },
-      { "minWords": 36, "text": "FANTASTIC", "multiplier": 3.0 }
+      {
+        "minWords": 9,
+        "text": "GOOD",
+        "multiplier": 1.2
+      },
+      {
+        "minWords": 18,
+        "text": "GREAT",
+        "multiplier": 1.5
+      },
+      {
+        "minWords": 27,
+        "text": "PERFECT",
+        "multiplier": 2.0
+      },
+      {
+        "minWords": 36,
+        "text": "FANTASTIC",
+        "multiplier": 3.0
+      }
     ]
   },
   "difficulty": {

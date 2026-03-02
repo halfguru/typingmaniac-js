@@ -50,6 +50,13 @@ export class UIScene extends Phaser.Scene {
   }
 
   create() {
+    if (this.limitBar) {
+      this.limitBar.destroy();
+    }
+    if (this.progressBar) {
+      this.progressBar.destroy();
+    }
+
     this.powerBoxGraphics = [];
     this.powerGlowGraphics = [];
     this.powerLabels = [];
