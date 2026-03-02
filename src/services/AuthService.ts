@@ -42,7 +42,7 @@ class AuthServiceImpl {
   constructor() {
     if (supabase) {
       supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session?.user) {
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
           this.currentUser = this.mapUser(session.user);
           setUser(this.currentUser.id, this.currentUser.name);
           identifyUser(this.currentUser.id, { name: this.currentUser.name });
@@ -93,6 +93,15 @@ class AuthServiceImpl {
   async initialize(): Promise<AuthUser | null> {
     if (!supabase) return null;
 
+    if (window.location.hash.includes('access_token')) {
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.hash);
+      if (!error && data.session) {
+        window.history.replaceState(null, '', window.location.pathname);
+        this.currentUser = this.mapUser(data.session.user);
+        return this.currentUser;
+      }
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (session?.user) {
       this.currentUser = this.mapUser(session.user);
@@ -111,11 +120,13 @@ class AuthServiceImpl {
     
     addBreadcrumb('auth', 'Attempting Google sign in');
     
+    const redirectUrl = window.location.origin + window.location.pathname;
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
         },
       });
       if (error) {
@@ -134,11 +145,13 @@ class AuthServiceImpl {
     
     addBreadcrumb('auth', 'Attempting Facebook sign in');
     
+    const redirectUrl = window.location.origin + window.location.pathname;
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'facebook',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: redirectUrl,
         },
       });
       if (error) {
