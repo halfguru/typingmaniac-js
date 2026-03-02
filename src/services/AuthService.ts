@@ -281,7 +281,7 @@ class AuthServiceImpl {
 
       if (!data) return null;
 
-      let rank = 1;
+      let rank = -1;
       let userScore = 0;
       let userLevel = 1;
       
@@ -294,7 +294,7 @@ class AuthServiceImpl {
         }
       }
 
-      if (userScore === 0) return null;
+      if (rank === -1) return null;
 
       return { rank, score: userScore, level: userLevel, total: count || data.length };
     } catch (err) {
