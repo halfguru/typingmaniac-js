@@ -105,14 +105,11 @@ Always run: `npx tsc --noEmit` to check for TypeScript errors.
 
 ## PR Workflow
 
-**Never bump version in a PR branch.** Version is managed on master after merge.
-
-Creating a PR:
+When creating a PR:
 1. Make code changes
 2. Run `npx tsc --noEmit` to verify
-3. Commit and push to feature branch
-4. Create PR with conventional commit title
+3. **Once ready to merge**: bump version in `package.json` and update `CHANGELOG.md`
+4. Commit and push to feature branch
+5. Create PR with conventional commit title
 
-After merge to master:
-1. CI automatically creates GitHub release from `package.json` version
-2. Version bump and changelog update happen separately if needed
+**Important**: Only bump version once when PR is complete, not with every commit.

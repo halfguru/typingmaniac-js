@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-03-01
+
+### Added
+
+- Footer with GitHub link and "Made by halfguru" credit in menu
+- Google and Facebook OAuth icons loaded from CDN
+- CI workflow to auto-create GitHub releases on master push
+- PR workflow conventions in AGENTS.md
+
+### Fixed
+
+- OAuth redirect URL for GitHub Pages subpath support
+
 ## [1.0.0] - 2025-03-01
 
 ### Added
