@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@sentry/browser": "^10.43.0",
-    "@supabase/supabase-js": "^2.99.0",
+    "@supabase/supabase-js": "^2.99.2",
     "phaser": "^3.70.0",
     "posthog-js": "^1.360.2"
   }
