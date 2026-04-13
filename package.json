@@ -26,6 +26,6 @@
     "@sentry/browser": "^10.43.0",
     "@supabase/supabase-js": "^2.100.0",
     "phaser": "^3.70.0",
-    "posthog-js": "^1.360.2"
+    "posthog-js": "^1.367.0"
   }
 }
